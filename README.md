@@ -1,0 +1,60 @@
+# Real-Time Crypto Price Streaming Pipeline
+
+A production-grade real-time cryptocurrency price streaming pipeline built with Apache Kafka, PySpark Structured Streaming, PostgreSQL, and AWS S3.
+
+## Architecture
+
+```
+CoinGecko API --> Kafka Producer --> Kafka Topic --> PySpark Consumer --> PostgreSQL
+                                                                     \-> AWS S3
+```
+
+## Tech Stack
+
+| Layer          | Technology                  |
+|----------------|-----------------------------|
+| Streaming      | Apache Kafka                |
+| Processing     | PySpark Structured Streaming|
+| Source API     | CoinGecko (free, no API key)|
+| Storage        | PostgreSQL + AWS S3         |
+| Orchestration  | Docker Compose              |
+| Testing        | pytest                      |
+| CI/CD          | GitHub Actions              |
+
+## Getting Started
+
+```bash
+# 1. Copy environment variables
+cp .env.example .env
+
+# 2. Start all services
+make up
+
+# 3. Run tests
+make test
+```
+
+## Services
+
+| Service    | Port | Description              |
+|------------|------|--------------------------|
+| Kafka      | 9092 | Message broker           |
+| Zookeeper  | 2181 | Kafka coordination       |
+| Kafka UI   | 8080 | Web UI for Kafka topics  |
+| PostgreSQL | 5432 | Relational storage       |
+
+## Project Structure
+
+```
+crypto-streaming-pipeline/
+├── producer/          # Kafka producer — fetches from CoinGecko
+├── consumer/          # Kafka consumer — writes to PostgreSQL/S3
+├── stream_processor/  # PySpark streaming jobs
+├── storage/           # DB schema and S3 utilities
+├── tests/             # pytest test suite
+├── docs/              # Architecture and API docs
+├── docker-compose.yml # Local dev environment
+├── .env.example       # Environment variable template
+├── requirements.txt   # Python dependencies
+└── Makefile           # Common dev commands
+```
