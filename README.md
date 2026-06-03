@@ -58,3 +58,16 @@ crypto-streaming-pipeline/
 ├── requirements.txt   # Python dependencies
 └── Makefile           # Common dev commands
 ```
+
+## Progress Log
+
+### Day 1 — Project Scaffold
+- Docker Compose with Kafka, Zookeeper, Kafka UI, PostgreSQL
+- Project folder structure created
+- README with architecture diagram
+
+### Day 2 — Kafka Producer
+- CoinGecko API integration fetching prices for 5 cryptos
+- Kafka producer publishing price events every 60 seconds
+- Event format: crypto_id, price_usd, market_cap, 24hr_change, timestamp
+- 6 unit tests passing green
