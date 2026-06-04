@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-from datetime import datetime
 
 import psycopg2
 from kafka import KafkaConsumer

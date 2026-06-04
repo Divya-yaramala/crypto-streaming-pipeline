@@ -30,8 +30,7 @@ def get_connection():
 
 def create_tables(conn) -> None:
     with conn.cursor() as cur:
-        cur.execute(
-            """
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS crypto_prices (
                 id                SERIAL PRIMARY KEY,
                 crypto_id         VARCHAR(50) NOT NULL,
@@ -43,12 +42,10 @@ def create_tables(conn) -> None:
                 ingested_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE (crypto_id, event_timestamp)
             )
-            """
-        )
+            """)
         logger.info("Table 'crypto_prices' ready")
 
-        cur.execute(
-            """
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS crypto_alerts (
                 id          SERIAL PRIMARY KEY,
                 crypto_id   VARCHAR(50),
@@ -57,8 +54,7 @@ def create_tables(conn) -> None:
                 price_usd   NUMERIC(20, 8),
                 created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
+            """)
         logger.info("Table 'crypto_alerts' ready")
 
     conn.commit()
