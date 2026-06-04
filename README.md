@@ -71,3 +71,10 @@ crypto-streaming-pipeline/
 - Kafka producer publishing price events every 60 seconds
 - Event format: crypto_id, price_usd, market_cap, 24hr_change, timestamp
 - 6 unit tests passing green
+
+### Day 3 — Kafka Consumer + PostgreSQL Storage
+- Built Kafka consumer reading crypto price events
+- PostgreSQL storage with idempotent inserts
+- Price alert detection: PUMP (>10%) and DUMP (<-10%)
+- Database setup script with crypto_prices and crypto_alerts tables
+- 6 unit tests passing green — 12/12 total
