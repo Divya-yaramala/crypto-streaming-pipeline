@@ -56,7 +56,9 @@ def read_kafka_stream(spark: SparkSession):
     parsed_df = raw_df.select(
         F.from_json(F.col("value").cast("string"), _SCHEMA).alias("data")
     ).select("data.*")
-    logger.info("Kafka stream reader configured for topic '%s'", KAFKA_TOPIC_CRYPTO_PRICES)
+    logger.info(
+        "Kafka stream reader configured for topic '%s'", KAFKA_TOPIC_CRYPTO_PRICES
+    )
     return parsed_df
 
 
