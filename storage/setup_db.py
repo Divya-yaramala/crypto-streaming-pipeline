@@ -60,10 +60,35 @@ def create_tables(conn) -> None:
     conn.commit()
 
 
+def create_aggregates_table(conn) -> None:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS crypto_price_aggregates (
+                id              SERIAL PRIMARY KEY,
+                crypto_id       VARCHAR(50),
+                window_start    TIMESTAMP,
+                window_end      TIMESTAMP,
+                avg_price       NUMERIC(20, 8),
+                min_price       NUMERIC(20, 8),
+                max_price       NUMERIC(20, 8),
+                price_range     NUMERIC(20, 8),
+                avg_change_24h  NUMERIC(10, 4),
+                record_count    INTEGER,
+                created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (crypto_id, window_start)
+            )
+            """
+        )
+    conn.commit()
+    logger.info("Table 'crypto_price_aggregates' ready")
+
+
 def setup_database() -> None:
     conn = get_connection()
     try:
         create_tables(conn)
+        create_aggregates_table(conn)
         logger.info("Database setup complete")
     finally:
         conn.close()
