@@ -5,8 +5,8 @@ A production-grade real-time cryptocurrency price streaming pipeline built with 
 ## Architecture
 
 ```
-CoinGecko API --> Kafka Producer --> Kafka Topic --> PySpark Consumer --> PostgreSQL
-                                                                     \-> AWS S3
+CoinGecko API --> Kafka Producer --> Kafka Topic --> PySpark Processor --> PostgreSQL
+                                                                      \-> AWS S3
 ```
 
 ## Tech Stack
@@ -78,3 +78,11 @@ crypto-streaming-pipeline/
 - Price alert detection: PUMP (>10%) and DUMP (<-10%)
 - Database setup script with crypto_prices and crypto_alerts tables
 - 6 unit tests passing green — 12/12 total
+
+### Day 4 — PySpark Stream Processor
+- Built PySpark Structured Streaming processor
+- Reads from Kafka topic in real-time
+- Calculates 1-minute OHLC aggregations per crypto
+- Writes micro-batch results to PostgreSQL
+- Added crypto_price_aggregates table
+- 5 unit tests passing green — 17/17 total
