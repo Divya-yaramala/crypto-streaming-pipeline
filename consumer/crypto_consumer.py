@@ -5,6 +5,8 @@ import os
 import psycopg2
 from kafka import KafkaConsumer
 
+from storage import s3_storage
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -20,6 +22,8 @@ POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "crypto_user")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "crypto_pass")
 POSTGRES_DB = os.getenv("POSTGRES_DB", "crypto_db")
+
+AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME", "")
 
 
 def create_kafka_consumer() -> KafkaConsumer:
@@ -72,14 +76,14 @@ def check_price_alert(event: dict, conn) -> None:
         return
 
     alert_type = None
-    message = None
+    alert_message = None
 
     if change > 10.0:
         alert_type = "PUMP"
-        message = "Price up more than 10% in 24h"
+        alert_message = "Price up more than 10% in 24h"
     elif change < -10.0:
         alert_type = "DUMP"
-        message = "Price down more than 10% in 24h"
+        alert_message = "Price down more than 10% in 24h"
 
     if alert_type:
         try:
@@ -92,7 +96,7 @@ def check_price_alert(event: dict, conn) -> None:
                     (
                         event.get("crypto_id"),
                         alert_type,
-                        message,
+                        alert_message,
                         event.get("price_usd"),
                     ),
                 )
@@ -106,6 +110,15 @@ def check_price_alert(event: dict, conn) -> None:
         except Exception as e:
             logger.error("Failed to insert alert: %s", e)
             conn.rollback()
+
+        alert_dict = {
+            "crypto_id": event.get("crypto_id"),
+            "alert_type": alert_type,
+            "message": alert_message,
+            "price_usd": event.get("price_usd"),
+        }
+        s3_result = s3_storage.save_alert_to_s3(alert_dict, AWS_BUCKET_NAME)
+        logger.info("S3 alert save: %s", "OK" if s3_result else "FAILED")
 
 
 def run_consumer() -> None:
@@ -123,6 +136,8 @@ def run_consumer() -> None:
             event = message.value
             saved = save_to_postgres(event, conn)
             if saved:
+                s3_result = s3_storage.save_price_event_to_s3(event, AWS_BUCKET_NAME)
+                logger.info("S3 price event save: %s", "OK" if s3_result else "FAILED")
                 check_price_alert(event, conn)
             logger.info(
                 "Processed message: %s | partition=%d offset=%d",

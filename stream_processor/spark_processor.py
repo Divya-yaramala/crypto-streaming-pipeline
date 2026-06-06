@@ -5,6 +5,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, StringType, StructField, StructType
 
+from storage import s3_storage
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -20,6 +22,7 @@ POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "crypto_user")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "crypto_pass")
 POSTGRES_DB = os.getenv("POSTGRES_DB", "crypto_db")
+AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME", "")
 
 _SCHEMA = StructType(
     [
@@ -83,7 +86,8 @@ def write_to_postgres(df, epoch_id: int) -> None:
         "password": POSTGRES_PASSWORD,
         "driver": "org.postgresql.Driver",
     }
-    row_count = df.count()
+    rows = df.collect()
+    row_count = len(rows)
     df.write.jdbc(
         url=jdbc_url,
         table="crypto_price_aggregates",
@@ -91,6 +95,10 @@ def write_to_postgres(df, epoch_id: int) -> None:
         properties=properties,
     )
     logger.info("Batch %d written: %d rows", epoch_id, row_count)
+    for row in rows:
+        agg = row.asDict()
+        s3_result = s3_storage.save_aggregation_to_s3(agg, AWS_BUCKET_NAME)
+        logger.info("S3 aggregation save: %s", "OK" if s3_result else "FAILED")
 
 
 def run_stream_processor() -> None:
