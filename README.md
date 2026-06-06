@@ -5,8 +5,14 @@ A production-grade real-time cryptocurrency price streaming pipeline built with 
 ## Architecture
 
 ```
-CoinGecko API --> Kafka Producer --> Kafka Topic --> PySpark Processor --> PostgreSQL
-                                                                      \-> AWS S3
+CoinGecko API --> Kafka Producer --> Kafka Topic
+                                          |
+                                   Kafka Consumer --> PostgreSQL (raw prices + alerts)
+                                          |                  |
+                                    PySpark            AWS S3 (cold storage)
+                                    Processor -->      raw/crypto/YYYY/MM/DD/
+                                    PostgreSQL         processed/aggregations/
+                                    (aggregates)       processed/alerts/
 ```
 
 ## Tech Stack
@@ -86,3 +92,10 @@ crypto-streaming-pipeline/
 - Writes micro-batch results to PostgreSQL
 - Added crypto_price_aggregates table
 - 5 unit tests passing green — 17/17 total
+
+### Day 5 — AWS S3 Cold Storage
+- Built S3 storage module saving raw events, aggregations, alerts
+- S3 partitioned by date: raw/crypto/YYYY/MM/DD/crypto_id/
+- Archive function moves old data after 7 days
+- Consumer and PySpark processor wired to save to S3
+- 6 unit tests passing green — 23/23 total
