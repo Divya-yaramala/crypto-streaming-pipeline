@@ -1,9 +1,11 @@
 import os
 
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
-POSTGRES_USER = os.getenv("POSTGRES_USER", "crypto_user")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "crypto_pass")
-POSTGRES_DB = os.getenv("POSTGRES_DB", "crypto_db")
+AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME", "")
+AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
+
+S3_RAW_PREFIX = "raw/crypto"
+S3_PROCESSED_PREFIX = "processed"
+S3_ARCHIVE_PREFIX = "archive/crypto"
+S3_DAYS_TO_KEEP = int(os.getenv("S3_DAYS_TO_KEEP", "7"))
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
