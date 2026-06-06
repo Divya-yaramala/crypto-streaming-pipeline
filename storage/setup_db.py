@@ -62,8 +62,7 @@ def create_tables(conn) -> None:
 
 def create_aggregates_table(conn) -> None:
     with conn.cursor() as cur:
-        cur.execute(
-            """
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS crypto_price_aggregates (
                 id              SERIAL PRIMARY KEY,
                 crypto_id       VARCHAR(50),
@@ -78,8 +77,7 @@ def create_aggregates_table(conn) -> None:
                 created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE (crypto_id, window_start)
             )
-            """
-        )
+            """)
     conn.commit()
     logger.info("Table 'crypto_price_aggregates' ready")
 

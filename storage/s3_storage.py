@@ -145,4 +145,8 @@ def get_daily_summary(bucket: str, date: str) -> dict:
 
 
 if __name__ == "__main__":
-    print(get_daily_summary(AWS_BUCKET_NAME, datetime.now(timezone.utc).strftime("%Y/%m/%d")))
+    print(
+        get_daily_summary(
+            AWS_BUCKET_NAME, datetime.now(timezone.utc).strftime("%Y/%m/%d")
+        )
+    )
