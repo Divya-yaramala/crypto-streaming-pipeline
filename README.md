@@ -27,6 +27,11 @@ CoinGecko API --> Kafka Producer --> Kafka Topic
 | Testing        | pytest                      |
 | CI/CD          | GitHub Actions              |
 
+## Documentation
+
+- [Data Flow](docs/data-flow.md)
+- [Setup Guide](docs/setup-guide.md)
+
 ## Getting Started
 
 ```bash
