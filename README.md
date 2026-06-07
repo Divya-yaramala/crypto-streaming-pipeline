@@ -1,5 +1,11 @@
 # Real-Time Crypto Price Streaming Pipeline
 
+[![CI Pipeline](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml)
+[![Code Quality](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml)
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 A production-grade real-time cryptocurrency price streaming pipeline built with Apache Kafka, PySpark Structured Streaming, PostgreSQL, and AWS S3.
 
 ## Architecture
@@ -104,3 +110,10 @@ crypto-streaming-pipeline/
 - Archive function moves old data after 7 days
 - Consumer and PySpark processor wired to save to S3
 - 6 unit tests passing green — 23/23 total
+
+### ✅ Day 6 — CI/CD with GitHub Actions
+- Created CI pipeline running all 23 tests on every push
+- Created code quality workflow: black, isort, flake8, mypy
+- Added CI and Code Quality badges to README
+- Added MIT License
+- Pipeline runs automatically on every commit
