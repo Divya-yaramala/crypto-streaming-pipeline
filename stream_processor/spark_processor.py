@@ -59,9 +59,7 @@ def read_kafka_stream(spark: SparkSession):
     parsed_df = raw_df.select(
         F.from_json(F.col("value").cast("string"), _SCHEMA).alias("data")
     ).select("data.*")
-    logger.info(
-        "Kafka stream reader configured for topic '%s'", KAFKA_TOPIC_CRYPTO_PRICES
-    )
+    logger.info("Kafka stream reader configured for topic '%s'", KAFKA_TOPIC_CRYPTO_PRICES)
     return parsed_df
 
 
@@ -106,11 +104,7 @@ def run_stream_processor() -> None:
     logger.info("Stream processor started")
     raw_stream = read_kafka_stream(spark)
     agg_stream = calculate_aggregations(raw_stream)
-    query = (
-        agg_stream.writeStream.outputMode("update")
-        .foreachBatch(write_to_postgres)
-        .start()
-    )
+    query = agg_stream.writeStream.outputMode("update").foreachBatch(write_to_postgres).start()
     query.awaitTermination()
 
 

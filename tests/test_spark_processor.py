@@ -10,11 +10,13 @@ for _mod in ["pyspark", "pyspark.sql", "pyspark.sql.functions", "pyspark.sql.typ
     sys.modules[_mod] = MagicMock()
 
 import stream_processor.spark_processor as sp
-from stream_processor.spark_processor import (WINDOW_DURATION,
-                                              calculate_aggregations,
-                                              create_spark_session,
-                                              read_kafka_stream,
-                                              write_to_postgres)
+from stream_processor.spark_processor import (
+    WINDOW_DURATION,
+    calculate_aggregations,
+    create_spark_session,
+    read_kafka_stream,
+    write_to_postgres,
+)
 
 
 def test_create_spark_session_success():

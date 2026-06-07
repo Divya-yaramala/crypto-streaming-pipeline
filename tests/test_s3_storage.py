@@ -5,8 +5,12 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from storage.s3_storage import (archive_old_data, get_daily_summary,
-                                save_alert_to_s3, save_price_event_to_s3)
+from storage.s3_storage import (
+    archive_old_data,
+    get_daily_summary,
+    save_alert_to_s3,
+    save_price_event_to_s3,
+)
 
 SAMPLE_EVENT = {
     "crypto_id": "bitcoin",

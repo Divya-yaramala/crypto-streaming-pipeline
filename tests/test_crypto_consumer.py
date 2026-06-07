@@ -5,8 +5,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from unittest.mock import MagicMock, patch
 
-from consumer.crypto_consumer import (check_price_alert, create_kafka_consumer,
-                                      save_to_postgres)
+from consumer.crypto_consumer import check_price_alert, create_kafka_consumer, save_to_postgres
 
 SAMPLE_EVENT = {
     "crypto_id": "bitcoin",

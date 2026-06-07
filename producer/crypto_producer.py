@@ -54,9 +54,7 @@ def create_kafka_producer() -> KafkaProducer:
     return producer
 
 
-def publish_price_event(
-    producer: KafkaProducer, crypto_id: str, price_data: dict
-) -> bool:
+def publish_price_event(producer: KafkaProducer, crypto_id: str, price_data: dict) -> bool:
     try:
         event = {
             "crypto_id": crypto_id,
@@ -68,9 +66,7 @@ def publish_price_event(
         }
         producer.send(KAFKA_TOPIC_CRYPTO_PRICES, value=event)
         producer.flush()
-        logger.info(
-            "Published event for %s at $%.2f", crypto_id, event["price_usd"] or 0
-        )
+        logger.info("Published event for %s at $%.2f", crypto_id, event["price_usd"] or 0)
         return True
     except KafkaError as e:
         logger.error("Kafka error publishing event for %s: %s", crypto_id, e)
@@ -89,9 +85,7 @@ def run_producer(interval_seconds: int = 60) -> None:
             published = 0
             for crypto_id in CRYPTO_IDS:
                 if crypto_id in prices:
-                    success = publish_price_event(
-                        producer, crypto_id, prices[crypto_id]
-                    )
+                    success = publish_price_event(producer, crypto_id, prices[crypto_id])
                     if success:
                         published += 1
             logger.info("Summary: %d/%d prices published", published, len(CRYPTO_IDS))

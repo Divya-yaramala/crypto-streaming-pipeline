@@ -58,7 +58,7 @@ def save_aggregation_to_s3(agg: dict, bucket: str) -> bool:
         s3 = get_s3_client()
         now = datetime.now(timezone.utc)
         window_start = agg.get("window_start")
-        if hasattr(window_start, "strftime"):
+        if window_start is not None and hasattr(window_start, "strftime"):
             date_str = window_start.strftime("%Y/%m/%d")
             ts_str = window_start.strftime("%Y-%m-%dT%H-%M-%S")
         else:
@@ -145,8 +145,4 @@ def get_daily_summary(bucket: str, date: str) -> dict:
 
 
 if __name__ == "__main__":
-    print(
-        get_daily_summary(
-            AWS_BUCKET_NAME, datetime.now(timezone.utc).strftime("%Y/%m/%d")
-        )
-    )
+    print(get_daily_summary(AWS_BUCKET_NAME, datetime.now(timezone.utc).strftime("%Y/%m/%d")))
