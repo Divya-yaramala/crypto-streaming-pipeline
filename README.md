@@ -6,6 +6,8 @@
 ![Tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+> 🚀 **Live Dashboard:** Run `streamlit run dashboard/app.py` and open http://localhost:8501
+
 A production-grade real-time cryptocurrency price streaming pipeline built with Apache Kafka, PySpark Structured Streaming, PostgreSQL, and AWS S3.
 
 ## Architecture
