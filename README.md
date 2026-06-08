@@ -33,6 +33,28 @@ CoinGecko API --> Kafka Producer --> Kafka Topic
 | Testing        | pytest                      |
 | CI/CD          | GitHub Actions              |
 
+## 📊 Live Dashboard
+
+Real-time crypto price dashboard built with Streamlit:
+
+| Feature | Details |
+|---|---|
+| Live prices | CoinGecko API (updates every 60s) |
+| Price charts | 24-hour Plotly line charts |
+| Alerts | PUMP/DUMP detection display |
+| Aggregations | 1-minute OHLC windows |
+
+Start the dashboard:
+
+```bash
+# With Docker
+docker-compose up -d streamlit-dashboard
+# Open http://localhost:8501
+
+# Without Docker
+streamlit run dashboard/app.py
+```
+
 ## Documentation
 
 - [Data Flow](docs/data-flow.md)
@@ -117,3 +139,11 @@ crypto-streaming-pipeline/
 - Added CI and Code Quality badges to README
 - Added MIT License
 - Pipeline runs automatically on every commit
+
+### ✅ Day 7 — Real-Time Streamlit Dashboard
+- Built live crypto price dashboard with Streamlit
+- KPI metrics for all 5 cryptos with 24h change
+- Plotly line charts for BTC and ETH price history
+- PUMP/DUMP alerts display and aggregations table
+- Auto-refresh every 60 seconds
+- Containerized with Docker
