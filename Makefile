@@ -1,4 +1,4 @@
-.PHONY: up down logs test lint format
+.PHONY: up down logs test lint format dashboard
 
 up:
 	docker-compose up -d
@@ -18,3 +18,6 @@ lint:
 format:
 	black producer/ consumer/ stream_processor/ storage/ tests/
 	isort producer/ consumer/ stream_processor/ storage/ tests/
+
+dashboard:
+	streamlit run dashboard/app.py --server.port 8501
