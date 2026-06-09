@@ -89,7 +89,7 @@ def validate_aggregation(agg: dict) -> dict:
     # 2. min_price <= avg_price <= max_price
     min_price = agg.get("min_price")
     max_price = agg.get("max_price")
-    if all(v is not None for v in [min_price, avg_price, max_price]):
+    if min_price is not None and avg_price is not None and max_price is not None:
         checks["price_order"] = min_price <= avg_price <= max_price
         if not checks["price_order"]:
             errors.append(f"Price order invalid: min={min_price} avg={avg_price} max={max_price}")
