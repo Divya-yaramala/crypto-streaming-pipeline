@@ -149,3 +149,10 @@ crypto-streaming-pipeline/
 - PUMP/DUMP alerts display and aggregations table
 - Auto-refresh every 60 seconds
 - Containerized with Docker
+
+### ✅ Day 8 — Stream Data Quality + Validation
+- Built stream data validator with 6-point validation checks
+- Invalid events logged and saved to S3 errors/ prefix
+- Validation wired into Kafka consumer and PySpark processor
+- Stream quality score calculated per batch
+- 7 unit tests passing green — 30/30 total
