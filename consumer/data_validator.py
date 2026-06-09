@@ -1,6 +1,5 @@
-import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 
 logging.basicConfig(
     level=logging.INFO,
@@ -93,9 +92,7 @@ def validate_aggregation(agg: dict) -> dict:
     if all(v is not None for v in [min_price, avg_price, max_price]):
         checks["price_order"] = min_price <= avg_price <= max_price
         if not checks["price_order"]:
-            errors.append(
-                f"Price order invalid: min={min_price} avg={avg_price} max={max_price}"
-            )
+            errors.append(f"Price order invalid: min={min_price} avg={avg_price} max={max_price}")
     else:
         checks["price_order"] = False
         errors.append("min_price, avg_price, or max_price is None")
@@ -118,9 +115,7 @@ def validate_aggregation(agg: dict) -> dict:
 
     valid = all(checks.values())
     result = {"valid": valid, "checks": checks, "errors": errors}
-    logger.info(
-        "Aggregation validation for %s: valid=%s", agg.get("crypto_id"), valid
-    )
+    logger.info("Aggregation validation for %s: valid=%s", agg.get("crypto_id"), valid)
     return result
 
 
@@ -129,9 +124,7 @@ def calculate_stream_quality_score(events: list) -> float:
         return 0.0
     valid_count = sum(1 for e in events if e.get("valid", False))
     score = (valid_count / len(events)) * 100
-    logger.info(
-        "Stream quality score: %.1f%% (%d/%d valid)", score, valid_count, len(events)
-    )
+    logger.info("Stream quality score: %.1f%% (%d/%d valid)", score, valid_count, len(events))
     return score
 
 
