@@ -1,10 +1,12 @@
 import json
 import logging
 import os
+from datetime import datetime, timezone
 
 import psycopg2
 from kafka import KafkaConsumer
 
+from consumer import data_validator
 from storage import s3_storage
 
 logging.basicConfig(
@@ -121,6 +123,28 @@ def check_price_alert(event: dict, conn) -> None:
         logger.info("S3 alert save: %s", "OK" if s3_result else "FAILED")
 
 
+def _save_invalid_event_to_s3(event: dict, errors: list) -> None:
+    if not AWS_BUCKET_NAME:
+        return
+    try:
+        s3 = s3_storage.get_s3_client()
+        now = datetime.now(timezone.utc)
+        crypto_id = event.get("crypto_id", "unknown")
+        key = (
+            f"errors/{now.strftime('%Y/%m/%d')}"
+            f"/{crypto_id}/{now.strftime('%Y-%m-%dT%H-%M-%S')}.json"
+        )
+        s3.put_object(
+            Bucket=AWS_BUCKET_NAME,
+            Key=key,
+            Body=json.dumps({"event": event, "errors": errors}, default=str),
+            ContentType="application/json",
+        )
+        logger.info("Saved invalid event to S3: %s", key)
+    except Exception as e:
+        logger.error("Failed to save invalid event to S3: %s", e)
+
+
 def run_consumer() -> None:
     conn = psycopg2.connect(
         host=POSTGRES_HOST,
@@ -131,22 +155,57 @@ def run_consumer() -> None:
     )
     consumer = create_kafka_consumer()
     logger.info("Consumer started. Listening for messages...")
+
+    total_count = 0
+    valid_count = 0
+    invalid_count = 0
+
     try:
         for message in consumer:
             event = message.value
-            saved = save_to_postgres(event, conn)
-            if saved:
-                s3_result = s3_storage.save_price_event_to_s3(event, AWS_BUCKET_NAME)
-                logger.info("S3 price event save: %s", "OK" if s3_result else "FAILED")
-                check_price_alert(event, conn)
+            total_count += 1
+
+            validation = data_validator.validate_price_event(event)
+
+            if not validation["valid"]:
+                invalid_count += 1
+                logger.warning(
+                    "Invalid event for %s: %s",
+                    event.get("crypto_id"),
+                    validation["errors"],
+                )
+                _save_invalid_event_to_s3(event, validation["errors"])
+            else:
+                valid_count += 1
+                saved = save_to_postgres(event, conn)
+                if saved:
+                    s3_result = s3_storage.save_price_event_to_s3(event, AWS_BUCKET_NAME)
+                    logger.info("S3 price event save: %s", "OK" if s3_result else "FAILED")
+                    check_price_alert(event, conn)
+
             logger.info(
                 "Processed message: %s | partition=%d offset=%d",
                 event.get("crypto_id"),
                 message.partition,
                 message.offset,
             )
+
+            if total_count % 10 == 0:
+                logger.info(
+                    "Validation metrics: %d valid, %d invalid out of %d total events",
+                    valid_count,
+                    invalid_count,
+                    total_count,
+                )
+
     except KeyboardInterrupt:
         logger.info("Consumer stopped")
+        logger.info(
+            "Final metrics: %d valid, %d invalid out of %d total events",
+            valid_count,
+            invalid_count,
+            total_count,
+        )
     finally:
         consumer.close()
         conn.close()

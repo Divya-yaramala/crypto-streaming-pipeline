@@ -5,6 +5,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, StringType, StructField, StructType
 
+from consumer import data_validator
 from storage import s3_storage
 
 logging.basicConfig(
@@ -95,6 +96,14 @@ def write_to_postgres(df, epoch_id: int) -> None:
     logger.info("Batch %d written: %d rows", epoch_id, row_count)
     for row in rows:
         agg = row.asDict()
+        validation = data_validator.validate_aggregation(agg)
+        if not validation["valid"]:
+            logger.warning(
+                "Invalid aggregation in batch %d for %s: %s",
+                epoch_id,
+                agg.get("crypto_id"),
+                validation["errors"],
+            )
         s3_result = s3_storage.save_aggregation_to_s3(agg, AWS_BUCKET_NAME)
         logger.info("S3 aggregation save: %s", "OK" if s3_result else "FAILED")
 
