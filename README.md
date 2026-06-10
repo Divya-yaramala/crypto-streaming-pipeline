@@ -156,3 +156,10 @@ crypto-streaming-pipeline/
 - Validation wired into Kafka consumer and PySpark processor
 - Stream quality score calculated per batch
 - 7 unit tests passing green — 30/30 total
+
+### ✅ Day 9 — Slack Alerting + Notifications
+- Built Slack alerter with PUMP/DUMP price alerts
+- Pipeline error notifications with color-coded severity
+- Daily summary with quality score and event counts
+- Slack wired into consumer and data validator
+- 6 unit tests passing green — 36/36 total
