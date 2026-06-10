@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import datetime, timezone
+from typing import Any
 
 import requests
 
@@ -18,7 +19,7 @@ def send_slack_message(message: str, color: str = "good") -> bool:
         logger.warning("SLACK_WEBHOOK_URL not set, skipping notification")
         return False
     try:
-        payload = {
+        payload: Any = {
             "attachments": [
                 {
                     "color": color,
@@ -37,17 +38,13 @@ def send_slack_message(message: str, color: str = "good") -> bool:
 
 
 def alert_price_pump(crypto_id: str, change_pct: float, price: float) -> bool:
-    message = (
-        f"🚀 PUMP ALERT: {crypto_id} up {change_pct:.2f}% "
-        f"— Current price: ${price:,.2f}"
-    )
+    message = f"🚀 PUMP ALERT: {crypto_id} up {change_pct:.2f}% " f"— Current price: ${price:,.2f}"
     return send_slack_message(message, color="danger")
 
 
 def alert_price_dump(crypto_id: str, change_pct: float, price: float) -> bool:
     message = (
-        f"📉 DUMP ALERT: {crypto_id} down {abs(change_pct):.2f}% "
-        f"— Current price: ${price:,.2f}"
+        f"📉 DUMP ALERT: {crypto_id} down {abs(change_pct):.2f}% " f"— Current price: ${price:,.2f}"
     )
     return send_slack_message(message, color="danger")
 

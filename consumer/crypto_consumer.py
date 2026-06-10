@@ -100,9 +100,7 @@ def check_price_alert(event: dict, conn) -> bool:
                     (crypto_id, alert_type, alert_message, price),
                 )
             conn.commit()
-            logger.info(
-                "Alert triggered: %s for %s (%.2f%%)", alert_type, crypto_id, change
-            )
+            logger.info("Alert triggered: %s for %s (%.2f%%)", alert_type, crypto_id, change)
             if alert_type == "PUMP":
                 slack_alerter.alert_price_pump(crypto_id, change, price)
             else:
@@ -212,9 +210,7 @@ def run_consumer() -> None:
             invalid_count,
             total_count,
         )
-        slack_alerter.send_daily_summary(
-            total_count, valid_count, alerts_triggered, quality_score
-        )
+        slack_alerter.send_daily_summary(total_count, valid_count, alerts_triggered, quality_score)
         consumer.close()
         conn.close()
 
