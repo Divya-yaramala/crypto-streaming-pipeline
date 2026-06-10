@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 
+from consumer import slack_alerter
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -125,6 +127,11 @@ def calculate_stream_quality_score(events: list) -> float:
     valid_count = sum(1 for e in events if e.get("valid", False))
     score = (valid_count / len(events)) * 100
     logger.info("Stream quality score: %.1f%% (%d/%d valid)", score, valid_count, len(events))
+    if score < 80.0:
+        slack_alerter.alert_pipeline_error(
+            "stream_quality",
+            f"Quality score {score:.1f}% below 80% threshold",
+        )
     return score
 
 

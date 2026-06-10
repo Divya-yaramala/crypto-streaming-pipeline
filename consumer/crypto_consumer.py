@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import psycopg2
 from kafka import KafkaConsumer
 
-from consumer import data_validator
+from consumer import data_validator, slack_alerter
 from storage import s3_storage
 
 logging.basicConfig(
@@ -72,10 +72,10 @@ def save_to_postgres(event: dict, conn) -> bool:
         return False
 
 
-def check_price_alert(event: dict, conn) -> None:
+def check_price_alert(event: dict, conn) -> bool:
     change = event.get("change_24h_pct")
     if change is None:
-        return
+        return False
 
     alert_type = None
     alert_message = None
@@ -88,6 +88,8 @@ def check_price_alert(event: dict, conn) -> None:
         alert_message = "Price down more than 10% in 24h"
 
     if alert_type:
+        crypto_id = event.get("crypto_id", "unknown")
+        price = event.get("price_usd") or 0.0
         try:
             with conn.cursor() as cur:
                 cur.execute(
@@ -95,32 +97,32 @@ def check_price_alert(event: dict, conn) -> None:
                     INSERT INTO crypto_alerts (crypto_id, alert_type, message, price_usd)
                     VALUES (%s, %s, %s, %s)
                     """,
-                    (
-                        event.get("crypto_id"),
-                        alert_type,
-                        alert_message,
-                        event.get("price_usd"),
-                    ),
+                    (crypto_id, alert_type, alert_message, price),
                 )
             conn.commit()
             logger.info(
-                "Alert triggered: %s for %s (%.2f%%)",
-                alert_type,
-                event.get("crypto_id"),
-                change,
+                "Alert triggered: %s for %s (%.2f%%)", alert_type, crypto_id, change
             )
+            if alert_type == "PUMP":
+                slack_alerter.alert_price_pump(crypto_id, change, price)
+            else:
+                slack_alerter.alert_price_dump(crypto_id, change, price)
         except Exception as e:
             logger.error("Failed to insert alert: %s", e)
             conn.rollback()
+            slack_alerter.alert_pipeline_error("check_price_alert", str(e))
 
         alert_dict = {
-            "crypto_id": event.get("crypto_id"),
+            "crypto_id": crypto_id,
             "alert_type": alert_type,
             "message": alert_message,
-            "price_usd": event.get("price_usd"),
+            "price_usd": price,
         }
         s3_result = s3_storage.save_alert_to_s3(alert_dict, AWS_BUCKET_NAME)
         logger.info("S3 alert save: %s", "OK" if s3_result else "FAILED")
+        return True
+
+    return False
 
 
 def _save_invalid_event_to_s3(event: dict, errors: list) -> None:
@@ -159,6 +161,7 @@ def run_consumer() -> None:
     total_count = 0
     valid_count = 0
     invalid_count = 0
+    alerts_triggered = 0
 
     try:
         for message in consumer:
@@ -181,7 +184,8 @@ def run_consumer() -> None:
                 if saved:
                     s3_result = s3_storage.save_price_event_to_s3(event, AWS_BUCKET_NAME)
                     logger.info("S3 price event save: %s", "OK" if s3_result else "FAILED")
-                    check_price_alert(event, conn)
+                    if check_price_alert(event, conn):
+                        alerts_triggered += 1
 
             logger.info(
                 "Processed message: %s | partition=%d offset=%d",
@@ -200,13 +204,17 @@ def run_consumer() -> None:
 
     except KeyboardInterrupt:
         logger.info("Consumer stopped")
+    finally:
+        quality_score = (valid_count / total_count * 100) if total_count > 0 else 0.0
         logger.info(
             "Final metrics: %d valid, %d invalid out of %d total events",
             valid_count,
             invalid_count,
             total_count,
         )
-    finally:
+        slack_alerter.send_daily_summary(
+            total_count, valid_count, alerts_triggered, quality_score
+        )
         consumer.close()
         conn.close()
 
