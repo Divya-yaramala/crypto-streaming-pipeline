@@ -58,5 +58,15 @@ services:
       - .env
     command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
 
+  snowflake-sync:
+    build:
+      context: .
+      dockerfile: Dockerfile.sync
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    restart: "no"
+
 volumes:
   postgres_data:
