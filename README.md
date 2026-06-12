@@ -3,12 +3,12 @@
 [![CI Pipeline](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-42%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 > 🚀 **Live Dashboard:** Run `streamlit run dashboard/app.py` and open http://localhost:8501
 
-A production-grade real-time cryptocurrency price streaming pipeline built with Apache Kafka, PySpark Structured Streaming, PostgreSQL, and AWS S3.
+A production-grade real-time cryptocurrency price streaming pipeline built with Apache Kafka, PySpark Structured Streaming, PostgreSQL, AWS S3, and Snowflake.
 
 ## Architecture
 
@@ -21,6 +21,11 @@ CoinGecko API --> Kafka Producer --> Kafka Topic
                                     Processor -->      raw/crypto/YYYY/MM/DD/
                                     PostgreSQL         processed/aggregations/
                                     (aggregates)       processed/alerts/
+                                                             |
+                                                      Snowflake Sync
+                                                      RAW.CRYPTO_PRICES
+                                                      RAW.CRYPTO_ALERTS
+                                                      MARTS.CRYPTO_DAILY_SUMMARY
 ```
 
 ## Tech Stack
@@ -31,6 +36,7 @@ CoinGecko API --> Kafka Producer --> Kafka Topic
 | Processing     | PySpark Structured Streaming|
 | Source API     | CoinGecko (free, no API key)|
 | Storage        | PostgreSQL + AWS S3         |
+| Data Warehouse | Snowflake                   |
 | Orchestration  | Docker Compose              |
 | Testing        | pytest                      |
 | CI/CD          | GitHub Actions              |
@@ -163,3 +169,11 @@ crypto-streaming-pipeline/
 - Daily summary with quality score and event counts
 - Slack wired into consumer and data validator
 - 6 unit tests passing green — 36/36 total
+
+### ✅ Day 10 — Snowflake Data Warehouse Integration
+- Built Snowflake connector with warehouse, database, and schema setup
+- Sync module pushes last 24h of prices and alerts from PostgreSQL to Snowflake
+- RAW layer: CRYPTO_PRICES and CRYPTO_ALERTS tables with dedup logic
+- MARTS layer: CRYPTO_DAILY_SUMMARY aggregated by crypto and date
+- Snowflake sync service added to Docker Compose
+- 6 unit tests passing green — 42/42 total
