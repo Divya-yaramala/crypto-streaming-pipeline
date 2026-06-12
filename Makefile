@@ -1,4 +1,4 @@
-.PHONY: up down logs test lint format dashboard
+.PHONY: up down logs test lint format dashboard dbt-run dbt-test dbt-docs
 
 up:
 	docker-compose up -d
@@ -21,3 +21,12 @@ format:
 
 dashboard:
 	streamlit run dashboard/app.py --server.port 8501
+
+dbt-run:
+	cd dbt_project && dbt run
+
+dbt-test:
+	cd dbt_project && dbt test
+
+dbt-docs:
+	cd dbt_project && dbt docs generate && dbt docs serve

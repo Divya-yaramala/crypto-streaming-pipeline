@@ -68,5 +68,18 @@ services:
       - .env
     restart: "no"
 
+  dbt-runner:
+    image: python:3.11-slim
+    depends_on:
+      - snowflake-sync
+    env_file:
+      - .env
+    volumes:
+      - ./dbt_project:/dbt_project
+    command: >
+      bash -c "pip install dbt-snowflake &&
+               dbt run --project-dir /dbt_project"
+    restart: "no"
+
 volumes:
   postgres_data:
