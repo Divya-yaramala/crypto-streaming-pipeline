@@ -78,10 +78,10 @@ def sync_alerts_to_snowflake(conn, alerts: list) -> int:
 def run_daily_mart_refresh(conn) -> bool:
     try:
         with conn.cursor() as cur:
-            cur.execute(
-                """
+            cur.execute("""
                 INSERT INTO CRYPTO_PIPELINE_DB.MARTS.CRYPTO_DAILY_SUMMARY
-                    (crypto_id, trade_date, avg_price, min_price, max_price, total_volume, alert_count)
+                    (crypto_id, trade_date, avg_price, min_price, max_price,
+                     total_volume, alert_count)
                 SELECT
                     p.crypto_id,
                     DATE(p.event_timestamp)          AS trade_date,
@@ -101,8 +101,7 @@ def run_daily_mart_refresh(conn) -> bool:
                     max_price    = EXCLUDED.max_price,
                     total_volume = EXCLUDED.total_volume,
                     alert_count  = EXCLUDED.alert_count
-                """
-            )
+                """)
         logger.info("Daily mart refresh complete for MARTS.CRYPTO_DAILY_SUMMARY")
         return True
     except Exception as e:
