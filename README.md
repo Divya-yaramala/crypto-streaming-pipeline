@@ -15,17 +15,17 @@ A production-grade real-time cryptocurrency price streaming pipeline built with 
 ```
 CoinGecko API --> Kafka Producer --> Kafka Topic
                                           |
-                                   Kafka Consumer --> PostgreSQL (raw prices + alerts)
-                                          |                  |
-                                    PySpark            AWS S3 (cold storage)
-                                    Processor -->      raw/crypto/YYYY/MM/DD/
-                                    PostgreSQL         processed/aggregations/
-                                    (aggregates)       processed/alerts/
+                                   Kafka Consumer --> PostgreSQL + AWS S3
+                                          |
+                                    PySpark Processor --> PostgreSQL (aggregates)
+                                          |
+                                    Snowflake Sync --> Snowflake RAW
                                                              |
-                                                      Snowflake Sync
-                                                      RAW.CRYPTO_PRICES
-                                                      RAW.CRYPTO_ALERTS
-                                                      MARTS.CRYPTO_DAILY_SUMMARY
+                                                    dbt --> Snowflake MARTS
+                                                            staging views +
+                                                            mart tables
+                                                             |
+                                                    Streamlit Dashboard
 ```
 
 ## Tech Stack
@@ -37,6 +37,7 @@ CoinGecko API --> Kafka Producer --> Kafka Topic
 | Source API     | CoinGecko (free, no API key)|
 | Storage        | PostgreSQL + AWS S3         |
 | Data Warehouse | Snowflake                   |
+| Transformation | dbt Core                    |
 | Orchestration  | Docker Compose              |
 | Testing        | pytest                      |
 | CI/CD          | GitHub Actions              |
@@ -177,3 +178,10 @@ crypto-streaming-pipeline/
 - MARTS layer: CRYPTO_DAILY_SUMMARY aggregated by crypto and date
 - Snowflake sync service added to Docker Compose
 - 6 unit tests passing green — 42/42 total
+
+### ✅ Day 11 — dbt Transformations
+- Set up dbt project connecting to Snowflake
+- Staging models: stg_crypto_prices, stg_crypto_alerts
+- Mart models: fct_crypto_daily, fct_crypto_alerts_summary, dim_cryptos
+- schema.yml with not_null tests on key columns
+- dbt added to Docker Compose and Makefile
