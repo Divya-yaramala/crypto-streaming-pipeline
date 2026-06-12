@@ -13,3 +13,4 @@ tenacity
 streamlit
 plotly
 snowflake-connector-python
+dbt-snowflake

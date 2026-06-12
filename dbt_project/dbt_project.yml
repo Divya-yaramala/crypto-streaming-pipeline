@@ -1,0 +1,10 @@
+name: crypto_pipeline
+version: 1.0.0
+profile: crypto_pipeline
+model-paths: ["models"]
+models:
+  crypto_pipeline:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

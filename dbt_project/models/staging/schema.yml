@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: stg_crypto_prices
+    description: Staged crypto price events from the RAW layer with price change calculations.
+    columns:
+      - name: crypto_id
+        description: Unique identifier for the cryptocurrency.
+        tests:
+          - not_null
+      - name: price_usd
+        description: Price of the cryptocurrency in USD at the time of the event.
+        tests:
+          - not_null
+      - name: event_timestamp
+        description: Timestamp when the price event was recorded.
+        tests:
+          - not_null
+      - name: market_cap_usd
+        description: Market capitalisation in USD.
+      - name: change_24h_pct
+        description: 24-hour percentage price change.
+      - name: source
+        description: Data source (e.g. coingecko).
+      - name: price_change_usd
+        description: Absolute price change from the previous event for the same crypto.
+      - name: is_price_increase
+        description: True if the price increased compared to the previous event.
+
+  - name: stg_crypto_alerts
+    description: Staged price alerts (PUMP/DUMP) with severity classification.
+    columns:
+      - name: crypto_id
+        description: Unique identifier for the cryptocurrency.
+      - name: alert_type
+        description: Alert type — PUMP or DUMP.
+      - name: message
+        description: Human-readable alert description.
+      - name: price_usd
+        description: Price at the time the alert was triggered.
+      - name: created_at
+        description: Timestamp when the alert was created.
+      - name: severity
+        description: Severity level derived from alert_type — HIGH for PUMP/DUMP, MEDIUM otherwise.
