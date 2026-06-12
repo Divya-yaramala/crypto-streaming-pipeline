@@ -44,21 +44,18 @@ def create_snowflake_objects(conn) -> None:
         cur.execute("CREATE SCHEMA IF NOT EXISTS CRYPTO_PIPELINE_DB.MARTS")
         logger.info("Schema MARTS ready")
 
-        cur.execute(
-            """
+        cur.execute("""
             CREATE WAREHOUSE IF NOT EXISTS CRYPTO_PIPELINE_WH
             WITH WAREHOUSE_SIZE = 'X-SMALL'
                  AUTO_SUSPEND = 60
                  AUTO_RESUME = TRUE
-            """
-        )
+            """)
         logger.info("Warehouse CRYPTO_PIPELINE_WH ready")
 
 
 def create_snowflake_tables(conn) -> None:
     with conn.cursor() as cur:
-        cur.execute(
-            """
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS CRYPTO_PIPELINE_DB.RAW.CRYPTO_PRICES (
                 crypto_id       VARCHAR(50),
                 price_usd       NUMERIC(20, 8),
@@ -69,12 +66,10 @@ def create_snowflake_tables(conn) -> None:
                 ingested_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
                 UNIQUE (crypto_id, event_timestamp)
             )
-            """
-        )
+            """)
         logger.info("Table RAW.CRYPTO_PRICES ready")
 
-        cur.execute(
-            """
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS CRYPTO_PIPELINE_DB.RAW.CRYPTO_ALERTS (
                 crypto_id  VARCHAR(50),
                 alert_type VARCHAR(50),
@@ -82,12 +77,10 @@ def create_snowflake_tables(conn) -> None:
                 price_usd  NUMERIC(20, 8),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
             )
-            """
-        )
+            """)
         logger.info("Table RAW.CRYPTO_ALERTS ready")
 
-        cur.execute(
-            """
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS CRYPTO_PIPELINE_DB.MARTS.CRYPTO_DAILY_SUMMARY (
                 crypto_id    VARCHAR(50),
                 trade_date   DATE,
@@ -99,8 +92,7 @@ def create_snowflake_tables(conn) -> None:
                 created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
                 UNIQUE (crypto_id, trade_date)
             )
-            """
-        )
+            """)
         logger.info("Table MARTS.CRYPTO_DAILY_SUMMARY ready")
 
 
