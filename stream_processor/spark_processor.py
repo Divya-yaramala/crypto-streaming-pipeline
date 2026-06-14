@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, StringType, StructField, StructType
 
-from consumer import data_validator
+from consumer import data_validator, dead_letter_queue
 from storage import s3_storage
 
 logging.basicConfig(
@@ -87,13 +87,18 @@ def write_to_postgres(df, epoch_id: int) -> None:
     }
     rows = df.collect()
     row_count = len(rows)
-    df.write.jdbc(
-        url=jdbc_url,
-        table="crypto_price_aggregates",
-        mode="append",
-        properties=properties,
-    )
-    logger.info("Batch %d written: %d rows", epoch_id, row_count)
+    try:
+        df.write.jdbc(
+            url=jdbc_url,
+            table="crypto_price_aggregates",
+            mode="append",
+            properties=properties,
+        )
+        logger.info("Batch %d written: %d rows", epoch_id, row_count)
+    except Exception as e:
+        logger.error("Batch %d postgres write failed: %s", epoch_id, e)
+        for row in rows:
+            dead_letter_queue.send_to_dlq(row.asDict(), str(e), "spark_postgres", AWS_BUCKET_NAME)
     for row in rows:
         agg = row.asDict()
         validation = data_validator.validate_aggregation(agg)
@@ -105,6 +110,10 @@ def write_to_postgres(df, epoch_id: int) -> None:
                 validation["errors"],
             )
         s3_result = s3_storage.save_aggregation_to_s3(agg, AWS_BUCKET_NAME)
+        if not s3_result:
+            dead_letter_queue.send_to_dlq(
+                agg, "s3 aggregation save failed", "spark_s3", AWS_BUCKET_NAME
+            )
         logger.info("S3 aggregation save: %s", "OK" if s3_result else "FAILED")
 
 

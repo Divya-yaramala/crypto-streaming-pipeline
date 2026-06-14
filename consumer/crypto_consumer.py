@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import psycopg2
 from kafka import KafkaConsumer
 
-from consumer import data_validator, slack_alerter
+from consumer import data_validator, dead_letter_queue, slack_alerter
 from storage import s3_storage
 
 logging.basicConfig(
@@ -160,6 +160,7 @@ def run_consumer() -> None:
     valid_count = 0
     invalid_count = 0
     alerts_triggered = 0
+    dlq_count = 0
 
     try:
         for message in consumer:
@@ -176,14 +177,35 @@ def run_consumer() -> None:
                     validation["errors"],
                 )
                 _save_invalid_event_to_s3(event, validation["errors"])
+                if dead_letter_queue.send_to_dlq(
+                    event, str(validation["errors"]), "validate", AWS_BUCKET_NAME
+                ):
+                    dlq_count += 1
             else:
                 valid_count += 1
                 saved = save_to_postgres(event, conn)
-                if saved:
+                if not saved:
+                    if dead_letter_queue.send_to_dlq(
+                        event, "postgres insert failed", "postgres", AWS_BUCKET_NAME
+                    ):
+                        dlq_count += 1
+                else:
                     s3_result = s3_storage.save_price_event_to_s3(event, AWS_BUCKET_NAME)
                     logger.info("S3 price event save: %s", "OK" if s3_result else "FAILED")
-                    if check_price_alert(event, conn):
-                        alerts_triggered += 1
+                    if not s3_result:
+                        if dead_letter_queue.send_to_dlq(
+                            event, "s3 save failed", "s3", AWS_BUCKET_NAME
+                        ):
+                            dlq_count += 1
+                    try:
+                        if check_price_alert(event, conn):
+                            alerts_triggered += 1
+                    except Exception as alert_err:
+                        logger.error("Alert step failed: %s", alert_err)
+                        if dead_letter_queue.send_to_dlq(
+                            event, str(alert_err), "alert", AWS_BUCKET_NAME
+                        ):
+                            dlq_count += 1
 
             logger.info(
                 "Processed message: %s | partition=%d offset=%d",
@@ -205,11 +227,13 @@ def run_consumer() -> None:
     finally:
         quality_score = (valid_count / total_count * 100) if total_count > 0 else 0.0
         logger.info(
-            "Final metrics: %d valid, %d invalid out of %d total events",
+            "Final metrics: %d valid, %d invalid, %d DLQ out of %d total events",
             valid_count,
             invalid_count,
+            dlq_count,
             total_count,
         )
+        logger.info("%d events sent to DLQ today", dlq_count)
         slack_alerter.send_daily_summary(total_count, valid_count, alerts_triggered, quality_score)
         consumer.close()
         conn.close()
