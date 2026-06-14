@@ -192,3 +192,10 @@ crypto-streaming-pipeline/
 - DLQ replay routes events back through correct pipeline step
 - Wired into consumer and PySpark processor
 - 6 unit tests passing green — 48/48 total
+
+### ✅ Day 13 — Pipeline Monitoring + Metrics
+- Built pipeline monitor tracking per-step metrics and durations
+- Hourly and daily report generation saved to S3
+- Success rates, avg/min/max durations per step
+- Monitoring wired into consumer and PySpark processor
+- 6 unit tests passing green — 54/54 total
