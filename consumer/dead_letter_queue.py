@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
+from typing import Optional
 
 import boto3
 
@@ -47,7 +48,7 @@ def send_to_dlq(event: dict, error: str, step: str, bucket: str) -> bool:
         return False
 
 
-def get_dlq_events(bucket: str, date: str, step: str = None) -> list:
+def get_dlq_events(bucket: str, date: str, step: Optional[str] = None) -> list:
     if not bucket:
         return []
     try:
