@@ -1,12 +1,13 @@
 import json
 import logging
 import os
+import time
 from datetime import datetime, timezone
 
 import psycopg2
 from kafka import KafkaConsumer
 
-from consumer import data_validator, dead_letter_queue, slack_alerter
+from consumer import data_validator, dead_letter_queue, pipeline_monitor, slack_alerter
 from storage import s3_storage
 
 logging.basicConfig(
@@ -166,14 +167,17 @@ def run_consumer() -> None:
         for message in consumer:
             event = message.value
             total_count += 1
+            crypto_id = event.get("crypto_id", "unknown")
 
+            consume_start = time.time()
             validation = data_validator.validate_price_event(event)
+            validate_duration = time.time() - consume_start
 
             if not validation["valid"]:
                 invalid_count += 1
                 logger.warning(
                     "Invalid event for %s: %s",
-                    event.get("crypto_id"),
+                    crypto_id,
                     validation["errors"],
                 )
                 _save_invalid_event_to_s3(event, validation["errors"])
@@ -181,31 +185,69 @@ def run_consumer() -> None:
                     event, str(validation["errors"]), "validate", AWS_BUCKET_NAME
                 ):
                     dlq_count += 1
+                pipeline_monitor.record_event_metric(
+                    "validate", crypto_id, "failure", validate_duration, AWS_BUCKET_NAME
+                )
             else:
+                pipeline_monitor.record_event_metric(
+                    "validate", crypto_id, "success", validate_duration, AWS_BUCKET_NAME
+                )
                 valid_count += 1
+
+                pg_start = time.time()
                 saved = save_to_postgres(event, conn)
+                pg_duration = time.time() - pg_start
                 if not saved:
+                    pipeline_monitor.record_event_metric(
+                        "postgres", crypto_id, "failure", pg_duration, AWS_BUCKET_NAME
+                    )
                     if dead_letter_queue.send_to_dlq(
                         event, "postgres insert failed", "postgres", AWS_BUCKET_NAME
                     ):
                         dlq_count += 1
                 else:
+                    pipeline_monitor.record_event_metric(
+                        "postgres", crypto_id, "success", pg_duration, AWS_BUCKET_NAME
+                    )
+
+                    s3_start = time.time()
                     s3_result = s3_storage.save_price_event_to_s3(event, AWS_BUCKET_NAME)
+                    s3_duration = time.time() - s3_start
                     logger.info("S3 price event save: %s", "OK" if s3_result else "FAILED")
+                    pipeline_monitor.record_event_metric(
+                        "s3",
+                        crypto_id,
+                        "success" if s3_result else "failure",
+                        s3_duration,
+                        AWS_BUCKET_NAME,
+                    )
                     if not s3_result:
                         if dead_letter_queue.send_to_dlq(
                             event, "s3 save failed", "s3", AWS_BUCKET_NAME
                         ):
                             dlq_count += 1
+
                     try:
+                        alert_start = time.time()
                         if check_price_alert(event, conn):
                             alerts_triggered += 1
+                        alert_duration = time.time() - alert_start
+                        pipeline_monitor.record_event_metric(
+                            "alert", crypto_id, "success", alert_duration, AWS_BUCKET_NAME
+                        )
                     except Exception as alert_err:
                         logger.error("Alert step failed: %s", alert_err)
+                        pipeline_monitor.record_event_metric(
+                            "alert", crypto_id, "failure", 0.0, AWS_BUCKET_NAME
+                        )
                         if dead_letter_queue.send_to_dlq(
                             event, str(alert_err), "alert", AWS_BUCKET_NAME
                         ):
                             dlq_count += 1
+
+            pipeline_monitor.record_event_metric(
+                "consume", crypto_id, "success", time.time() - consume_start, AWS_BUCKET_NAME
+            )
 
             logger.info(
                 "Processed message: %s | partition=%d offset=%d",
@@ -235,6 +277,8 @@ def run_consumer() -> None:
         )
         logger.info("%d events sent to DLQ today", dlq_count)
         slack_alerter.send_daily_summary(total_count, valid_count, alerts_triggered, quality_score)
+        today = datetime.now(timezone.utc).strftime("%Y/%m/%d")
+        pipeline_monitor.generate_daily_report(AWS_BUCKET_NAME, today)
         consumer.close()
         conn.close()
 

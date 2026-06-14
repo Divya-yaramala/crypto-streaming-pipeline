@@ -1,11 +1,12 @@
 import logging
 import os
+import time
 
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, StringType, StructField, StructType
 
-from consumer import data_validator, dead_letter_queue
+from consumer import data_validator, dead_letter_queue, pipeline_monitor
 from storage import s3_storage
 
 logging.basicConfig(
@@ -87,6 +88,7 @@ def write_to_postgres(df, epoch_id: int) -> None:
     }
     rows = df.collect()
     row_count = len(rows)
+    batch_start = time.time()
     try:
         df.write.jdbc(
             url=jdbc_url,
@@ -94,9 +96,17 @@ def write_to_postgres(df, epoch_id: int) -> None:
             mode="append",
             properties=properties,
         )
+        batch_duration = time.time() - batch_start
         logger.info("Batch %d written: %d rows", epoch_id, row_count)
+        pipeline_monitor.record_event_metric(
+            "spark_process", "all", "success", batch_duration, AWS_BUCKET_NAME
+        )
     except Exception as e:
+        batch_duration = time.time() - batch_start
         logger.error("Batch %d postgres write failed: %s", epoch_id, e)
+        pipeline_monitor.record_event_metric(
+            "spark_process", "all", "failure", batch_duration, AWS_BUCKET_NAME
+        )
         for row in rows:
             dead_letter_queue.send_to_dlq(row.asDict(), str(e), "spark_postgres", AWS_BUCKET_NAME)
     for row in rows:
