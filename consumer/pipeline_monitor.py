@@ -47,7 +47,10 @@ def record_event_metric(
         )
         logger.info(
             "Metric recorded: step=%s crypto=%s status=%s %.3fs",
-            step, crypto_id, status, duration_seconds,
+            step,
+            crypto_id,
+            status,
+            duration_seconds,
         )
         return True
     except Exception as e:
@@ -104,10 +107,7 @@ def generate_hourly_report(bucket: str, date: str, hour: int) -> dict:
     report: dict = {"date": date, "hour": hour, "steps": {}}
     for step in PIPELINE_STEPS:
         metrics = get_step_metrics(step, bucket, date)
-        hour_metrics = [
-            m for m in metrics
-            if datetime.fromisoformat(m["recorded_at"]).hour == hour
-        ]
+        hour_metrics = [m for m in metrics if datetime.fromisoformat(m["recorded_at"]).hour == hour]
         report["steps"][step] = calculate_step_stats(hour_metrics)
     total = sum(s["total_events"] for s in report["steps"].values())
     logger.info("Hourly report for %s hour=%d: %d total events", date, hour, total)
