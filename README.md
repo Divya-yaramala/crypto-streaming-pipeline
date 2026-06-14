@@ -185,3 +185,10 @@ crypto-streaming-pipeline/
 - Mart models: fct_crypto_daily, fct_crypto_alerts_summary, dim_cryptos
 - schema.yml with not_null tests on key columns
 - dbt added to Docker Compose and Makefile
+
+### ✅ Day 12 — Dead Letter Queue Pattern
+- Built DLQ capturing failed events to S3 errors/crypto/YYYY/MM/DD/
+- Failed events categorized by step: validate, postgres, s3, alert
+- DLQ replay routes events back through correct pipeline step
+- Wired into consumer and PySpark processor
+- 6 unit tests passing green — 48/48 total
