@@ -3,6 +3,7 @@ import logging
 import os
 import time
 from datetime import datetime, timezone
+from typing import Any, Optional
 
 import boto3
 import psycopg2
@@ -27,7 +28,7 @@ POSTGRES_DB = os.getenv("POSTGRES_DB", "crypto_db")
 def fetch_historical_prices(crypto_id: str, days: int = 30) -> list:
     try:
         url = f"{COINGECKO_BASE_URL}/coins/{crypto_id}/market_chart"
-        params = {"vs_currency": "usd", "days": days, "interval": "daily"}
+        params: dict[str, Any] = {"vs_currency": "usd", "days": days, "interval": "daily"}
         response = requests.get(url, params=params, timeout=30)
         response.raise_for_status()
         data = response.json()
@@ -114,7 +115,7 @@ def save_historical_to_postgres(events: list, conn) -> int:
     return inserted
 
 
-def run_backfill(crypto_ids: list, days: int = 30, bucket: str = None) -> dict:
+def run_backfill(crypto_ids: list, days: int = 30, bucket: Optional[str] = None) -> dict:
     total_events = 0
     saved_s3 = 0
     saved_postgres = 0
@@ -160,5 +161,5 @@ def run_backfill(crypto_ids: list, days: int = 30, bucket: str = None) -> dict:
 if __name__ == "__main__":
     from producer.config import CRYPTO_IDS
 
-    result = run_backfill(CRYPTO_IDS, days=30, bucket=os.getenv("AWS_BUCKET_NAME"))
+    result = run_backfill(CRYPTO_IDS, days=30, bucket=os.getenv("AWS_BUCKET_NAME") or "")
     print(result)
