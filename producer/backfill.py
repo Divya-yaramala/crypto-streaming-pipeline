@@ -71,7 +71,9 @@ def save_historical_to_s3(events: list, crypto_id: str, bucket: str) -> int:
             if (i + 1) % 10 == 0:
                 logger.info(
                     "S3 backfill progress: %d/%d events saved for %s",
-                    i + 1, len(events), crypto_id,
+                    i + 1,
+                    len(events),
+                    crypto_id,
                 )
         except Exception as e:
             logger.error("Failed to save historical event to S3: %s", e)

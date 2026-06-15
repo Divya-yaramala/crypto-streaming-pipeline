@@ -82,6 +82,22 @@ make up
 make test
 ```
 
+## Backfilling Historical Data
+
+```bash
+# Backfill last 30 days for all cryptos
+python scripts/run_backfill.py --days 30
+
+# Backfill specific crypto
+python scripts/run_backfill.py --crypto bitcoin --days 90
+
+# Preview without loading
+python scripts/run_backfill.py --days 30 --dry-run
+
+# S3 only
+python scripts/run_backfill.py --days 30 --s3-only
+```
+
 ## Services
 
 | Service    | Port | Description              |
@@ -199,3 +215,10 @@ crypto-streaming-pipeline/
 - Success rates, avg/min/max durations per step
 - Monitoring wired into consumer and PySpark processor
 - 6 unit tests passing green — 54/54 total
+
+### ✅ Day 14 — Historical Backfill Capability
+- Built backfill module fetching historical prices from CoinGecko
+- Saves to both S3 and PostgreSQL with idempotent inserts
+- CLI script with --days, --crypto, --dry-run, --s3-only flags
+- Handles up to 365 days of historical data
+- 6 unit tests passing green — 60/60 total
