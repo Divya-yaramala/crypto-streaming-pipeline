@@ -68,6 +68,7 @@ streamlit run dashboard/app.py
 
 - [Data Flow](docs/data-flow.md)
 - [Setup Guide](docs/setup-guide.md)
+- [Backfill Guide](docs/backfill-guide.md)
 
 ## Getting Started
 
