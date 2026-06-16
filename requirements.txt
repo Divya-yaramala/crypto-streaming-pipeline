@@ -16,3 +16,4 @@ snowflake-connector-python
 dbt-snowflake
 fastapi
 uvicorn
+httpx
