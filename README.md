@@ -83,6 +83,26 @@ make up
 make test
 ```
 
+## REST API
+
+The pipeline exposes a REST API:
+
+| Endpoint | Description |
+|---|---|
+| GET /health | Health check |
+| GET /cryptos | List tracked cryptos |
+| GET /prices/{crypto_id} | Recent prices |
+| GET /alerts/{crypto_id} | Recent alerts |
+| GET /aggregations/{crypto_id} | 1-min aggregations |
+| GET /summary/{crypto_id} | Combined summary |
+| GET /dashboard | All cryptos summary |
+
+Start the API:
+```bash
+uvicorn api.main:app --reload --port 8000
+# Swagger UI: http://localhost:8000/docs
+```
+
 ## Backfilling Historical Data
 
 ```bash
@@ -223,3 +243,10 @@ crypto-streaming-pipeline/
 - CLI script with --days, --crypto, --dry-run, --s3-only flags
 - Handles up to 365 days of historical data
 - 6 unit tests passing green — 60/60 total
+
+### ✅ Day 15 — REST API
+- Built 7 REST endpoints exposing pipeline results
+- Swagger UI auto-generated at /docs
+- Endpoints for prices, alerts, aggregations, summary
+- Dashboard endpoint returns all 5 cryptos at once
+- 6 unit tests passing green — 66/66 total
