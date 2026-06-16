@@ -1,4 +1,4 @@
-.PHONY: up down logs test lint format dashboard dbt-run dbt-test dbt-docs
+.PHONY: up down logs test lint format dashboard dbt-run dbt-test dbt-docs backfill backfill-dry backfill-year
 
 up:
 	docker-compose up -d
@@ -30,3 +30,12 @@ dbt-test:
 
 dbt-docs:
 	cd dbt_project && dbt docs generate && dbt docs serve
+
+backfill:
+	python scripts/run_backfill.py --days 30
+
+backfill-dry:
+	python scripts/run_backfill.py --days 30 --dry-run
+
+backfill-year:
+	python scripts/run_backfill.py --days 365
