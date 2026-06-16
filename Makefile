@@ -1,4 +1,4 @@
-.PHONY: up down logs test lint format dashboard dbt-run dbt-test dbt-docs backfill backfill-dry backfill-year
+.PHONY: up down logs test lint format dashboard dbt-run dbt-test dbt-docs backfill backfill-dry backfill-year api
 
 up:
 	docker-compose up -d
@@ -39,3 +39,6 @@ backfill-dry:
 
 backfill-year:
 	python scripts/run_backfill.py --days 365
+
+api:
+	uvicorn api.main:app --reload --port 8000

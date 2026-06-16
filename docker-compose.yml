@@ -58,6 +58,17 @@ services:
       - .env
     command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
 
+  crypto-api:
+    build: ./api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    volumes:
+      - ./api:/app
+
   snowflake-sync:
     build:
       context: .
