@@ -25,3 +25,16 @@ archive/crypto/ (data older than 7 days)
 | crypto_prices | Raw price events |
 | crypto_alerts | PUMP/DUMP alerts |
 | crypto_price_aggregates | 1-minute OHLC windows |
+
+## Historical Backfill Flow
+CoinGecko Historical API → backfill.py → S3 (raw/crypto/YYYY/MM/DD/)
+                                       → PostgreSQL (crypto_prices)
+
+## Backfill vs Real-Time
+| Feature | Real-Time | Backfill |
+|---|---|---|
+| Source | CoinGecko live API | CoinGecko history API |
+| Frequency | Every 60 seconds | On-demand |
+| Data | Current prices | Historical OHLC |
+| Storage | S3 + PostgreSQL | S3 + PostgreSQL |
+| Deduplication | ON CONFLICT | ON CONFLICT |
