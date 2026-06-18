@@ -31,3 +31,11 @@ python consumer/crypto_consumer.py
 # Run PySpark processor (terminal 3)
 python stream_processor/spark_processor.py
 ```
+
+## Pro Tips
+- Run `python scripts/validate_secrets.py` before starting pipeline
+- Use `--dry-run` flag on backfill to preview data volume
+- Check Kafka UI at http://localhost:8080 to monitor topics
+- Use `make dashboard` to start Streamlit on port 8501
+- Run `pytest tests/` before every commit
+- Check `monitoring/reports/` in S3 for daily pipeline health
