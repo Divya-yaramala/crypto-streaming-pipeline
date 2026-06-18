@@ -85,6 +85,7 @@ streamlit run dashboard/app.py
 - [Data Flow](docs/data-flow.md)
 - [Setup Guide](docs/setup-guide.md)
 - [Operations Runbook](docs/runbook.md)
+- [Project Statistics](docs/project-stats.md)
 
 ## Getting Started
 
