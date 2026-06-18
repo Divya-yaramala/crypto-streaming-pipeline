@@ -76,10 +76,13 @@ streamlit run dashboard/app.py
 # 1. Copy environment variables
 cp .env.example .env
 
-# 2. Start all services
+# 2. Validate all environment variables
+python scripts/validate_secrets.py
+
+# 3. Start all services
 make up
 
-# 3. Run tests
+# 4. Run tests
 make test
 ```
 
@@ -250,3 +253,10 @@ crypto-streaming-pipeline/
 - Endpoints for prices, alerts, aggregations, summary
 - Dashboard endpoint returns all 5 cryptos at once
 - 6 unit tests passing green — 66/66 total
+
+### ✅ Day 16 — Configuration Management
+- Built typed configuration manager using Python dataclasses
+- 5 config classes: Kafka, AWS, Postgres, Snowflake, Crypto
+- CLI secrets validator checking all required env vars
+- Fail-fast validation at pipeline startup
+- 6 unit tests passing green — 72/72 total
