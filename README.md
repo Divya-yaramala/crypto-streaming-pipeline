@@ -3,12 +3,25 @@
 [![CI Pipeline](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Tests](https://img.shields.io/badge/tests-42%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-72%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 > 🚀 **Live Dashboard:** Run `streamlit run dashboard/app.py` and open http://localhost:8501
 
 A production-grade real-time cryptocurrency price streaming pipeline built with Apache Kafka, PySpark Structured Streaming, PostgreSQL, AWS S3, and Snowflake.
+
+## Key Features
+
+- Real-time Kafka streaming at 60-second intervals
+- PySpark micro-batch aggregations (1-minute windows)
+- Dual storage: PostgreSQL (hot) + AWS S3 (cold)
+- Snowflake data warehouse with dbt transformations
+- Live Streamlit dashboard with auto-refresh
+- Slack alerts for PUMP/DUMP price movements
+- Dead letter queue for zero data loss
+- 6-point data validation per event
+- Historical backfill up to 365 days
+- REST API with Swagger UI
 
 ## Architecture
 
@@ -66,9 +79,12 @@ streamlit run dashboard/app.py
 
 ## Documentation
 
+- [Pipeline Overview](docs/pipeline-overview.md)
+- [Architecture Decision Records](docs/adr/README.md)
+- [Backfill Guide](docs/backfill-guide.md)
 - [Data Flow](docs/data-flow.md)
 - [Setup Guide](docs/setup-guide.md)
-- [Backfill Guide](docs/backfill-guide.md)
+- [Operations Runbook](docs/runbook.md)
 
 ## Getting Started
 
@@ -260,3 +276,10 @@ crypto-streaming-pipeline/
 - CLI secrets validator checking all required env vars
 - Fail-fast validation at pipeline startup
 - 6 unit tests passing green — 72/72 total
+
+### ✅ Day 17 — Documentation + ADRs
+- Created 7 Architecture Decision Records
+- Comprehensive pipeline overview document
+- Operations runbook for day-to-day management
+- README updated with docs links and key features
+- Portfolio-ready documentation
