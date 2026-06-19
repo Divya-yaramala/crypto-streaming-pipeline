@@ -5,10 +5,10 @@
 |---|---|
 | Python files | 15+ modules |
 | Test files | 10 test files |
-| Total tests | 72 passing |
+| Total tests | 83 passing |
 | dbt models | 5 models |
 | Kafka topics | 2 topics |
-| ADRs | 7 architecture decisions |
+| ADRs | 8 architecture decisions |
 | API endpoints | 7 REST endpoints |
 
 ## Pipeline Statistics
@@ -32,3 +32,6 @@
 8. Pipeline monitoring and metrics
 9. Historical backfill up to 365 days
 10. CI/CD with GitHub Actions
+11. S3 Caching with TTL expiry
+12. Parallel Processing with ThreadPoolExecutor
+13. Batch PostgreSQL inserts
