@@ -32,6 +32,13 @@ python consumer/crypto_consumer.py
 python stream_processor/spark_processor.py
 ```
 
+## Performance Tips
+- Use parallel_process_events for high-volume event batches
+- Set batch_size=100 for PostgreSQL batch inserts
+- Cache CoinGecko API responses with ttl_seconds=300
+- Clear expired cache weekly: `python -c "from consumer.cache_manager import clear_expired_cache; import os; clear_expired_cache(os.getenv('AWS_BUCKET_NAME'))"`
+- Run benchmark to measure speedup: `python -c "from consumer.performance_optimizer import run_benchmark; print(run_benchmark([], lambda x: x))"`
+
 ## Pro Tips
 - Run `python scripts/validate_secrets.py` before starting pipeline
 - Use `--dry-run` flag on backfill to preview data volume
