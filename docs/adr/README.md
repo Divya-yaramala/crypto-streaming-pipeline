@@ -13,3 +13,4 @@ Architecture Decision Records (ADRs) document the significant technical decision
 | [005](005-snowflake-over-redshift.md) | Snowflake over Redshift | Accepted |
 | [006](006-streamlit-over-dash.md) | Streamlit over Dash | Accepted |
 | [007](007-s3-cold-storage.md) | S3 cold storage strategy | Accepted |
+| [008](008-caching-strategy.md) | S3 Caching Strategy | Accepted |
