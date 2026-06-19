@@ -3,7 +3,7 @@
 [![CI Pipeline](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Tests](https://img.shields.io/badge/tests-72%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-83%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 > 🚀 **Live Dashboard:** Run `streamlit run dashboard/app.py` and open http://localhost:8501
@@ -284,3 +284,10 @@ crypto-streaming-pipeline/
 - Operations runbook for day-to-day management
 - README updated with docs links and key features
 - Portfolio-ready documentation
+
+### ✅ Day 18 — Performance Optimization + Caching
+- Built S3-backed cache manager with TTL, hit/miss, and expiry logic
+- MD5 cache key generator for consistent, reproducible lookups
+- Performance optimizer with timer decorator, parallel ThreadPoolExecutor, and batch Postgres inserts
+- Benchmark utility comparing sequential vs parallel throughput
+- 11 unit tests passing green — 83/83 total
