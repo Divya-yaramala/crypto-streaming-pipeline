@@ -8,7 +8,7 @@
 | Total tests | 83 passing |
 | dbt models | 5 models |
 | Kafka topics | 2 topics |
-| ADRs | 8 architecture decisions |
+| ADRs | 9 architecture decisions |
 | API endpoints | 7 REST endpoints |
 
 ## Pipeline Statistics
@@ -35,3 +35,5 @@
 11. S3 Caching with TTL expiry
 12. Parallel Processing with ThreadPoolExecutor
 13. Batch PostgreSQL inserts
+14. Retry Logic with Tenacity (3 attempts, exponential backoff)
+15. Edge Case Test Coverage (boundary conditions)
