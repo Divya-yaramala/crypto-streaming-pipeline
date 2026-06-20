@@ -147,3 +147,11 @@ Failed events at each pipeline step are written to `errors/crypto/YYYY/MM/DD/{st
 - Change < -10%: DUMP alert → PostgreSQL + S3 + Slack
 - Pipeline errors: `alert_pipeline_error()` → Slack warning
 - Quality score < 80%: `alert_pipeline_error()` → Slack warning
+
+## Production Hardening
+- All external API calls have 3 retry attempts
+- Database connections retry with 2-second fixed wait
+- Every function has type hints and docstrings
+- No hardcoded values — all from config_manager
+- Dead letter queue captures all failures
+- CI/CD validates every push
