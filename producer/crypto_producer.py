@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import requests
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
+from tenacity import retry, stop_after_attempt, wait_exponential, wait_fixed
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,6 +22,7 @@ COINGECKO_BASE_URL = os.getenv("COINGECKO_BASE_URL", "https://api.coingecko.com/
 CRYPTO_IDS = ["bitcoin", "ethereum", "solana", "cardano", "dogecoin"]
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def fetch_crypto_prices(crypto_ids: list) -> dict:
     """Fetch current USD prices for the given crypto IDs from CoinGecko."""
     ids_param = ",".join(crypto_ids)
@@ -46,6 +48,7 @@ def fetch_crypto_prices(crypto_ids: list) -> dict:
         return {}
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def create_kafka_producer() -> KafkaProducer:
     """Create and return a configured KafkaProducer instance."""
     producer = KafkaProducer(

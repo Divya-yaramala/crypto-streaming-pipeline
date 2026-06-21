@@ -7,6 +7,8 @@ from typing import Any
 
 import psycopg2
 from kafka import KafkaConsumer
+from kafka.errors import KafkaError
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from consumer import data_validator, dead_letter_queue, pipeline_monitor, slack_alerter
 from storage import s3_storage
@@ -44,6 +46,7 @@ def create_kafka_consumer() -> KafkaConsumer:
     return consumer
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def save_to_postgres(event: dict, conn: Any) -> bool:
     """Insert a price event into PostgreSQL, ignoring duplicates on conflict."""
     try:
@@ -271,6 +274,8 @@ def run_consumer() -> None:
                     total_count,
                 )
 
+    except KafkaError as e:
+        logger.error("Kafka consumer error, shutting down: %s", e)
     except KeyboardInterrupt:
         logger.info("Consumer stopped")
     finally:
