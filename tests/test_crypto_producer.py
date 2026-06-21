@@ -113,3 +113,30 @@ def test_fetch_crypto_prices_timeout():
         result = fetch_crypto_prices(["bitcoin"])
 
     assert result == {}
+
+
+def test_fetch_crypto_prices_empty_response():
+    mock_response = MagicMock()
+    mock_response.json.return_value = {}
+    mock_response.raise_for_status.return_value = None
+
+    with patch("producer.crypto_producer.requests.get", return_value=mock_response):
+        result = fetch_crypto_prices(["bitcoin", "ethereum"])
+
+    assert result == {}
+
+
+def test_publish_price_event_kafka_timeout():
+    from kafka.errors import KafkaTimeoutError
+
+    mock_producer = MagicMock()
+    mock_producer.send.side_effect = KafkaTimeoutError("Producer send timed out")
+
+    price_data = {
+        "usd": 65000.0,
+        "usd_market_cap": 1280000000000.0,
+        "usd_24h_change": 2.5,
+    }
+    result = publish_price_event(mock_producer, "bitcoin", price_data)
+
+    assert result is False

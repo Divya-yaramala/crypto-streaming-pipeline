@@ -75,3 +75,22 @@ def test_create_kafka_consumer_success():
     with patch("consumer.crypto_consumer.KafkaConsumer", return_value=mock_consumer):
         result = create_kafka_consumer()
     assert result is mock_consumer
+
+
+def test_save_to_postgres_duplicate():
+    conn, cursor = _make_conn()
+    # Simulate ON CONFLICT DO NOTHING: execute succeeds but 0 rows affected
+    cursor.execute.return_value = None
+    cursor.rowcount = 0
+    result = save_to_postgres(SAMPLE_EVENT, conn)
+    assert result is True
+    conn.commit.assert_called_once()
+
+
+def test_check_price_alert_boundary():
+    conn, cursor = _make_conn()
+    # Exactly at threshold (10.0) — change > 10.0 is False, so no alert
+    event = {**SAMPLE_EVENT, "change_24h_pct": 10.0}
+    result = check_price_alert(event, conn)
+    assert result is False
+    cursor.execute.assert_not_called()

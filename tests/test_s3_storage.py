@@ -105,3 +105,39 @@ def test_get_daily_summary_structure():
     assert "total_alerts" in result
     assert "total_aggregations" in result
     assert isinstance(result["total_events"], int)
+
+
+def test_save_price_event_correct_partition():
+    mock_client = MagicMock()
+    event = {**SAMPLE_EVENT, "timestamp": "2026-03-15T08:30:00+00:00"}
+
+    with patch("storage.s3_storage.get_s3_client", return_value=mock_client):
+        save_price_event_to_s3(event, "test-bucket")
+
+    call_kwargs = mock_client.put_object.call_args[1]
+    assert "2026/03/15" in call_kwargs["Key"]
+    assert "bitcoin" in call_kwargs["Key"]
+
+
+def test_archive_skips_recent_files():
+    mock_client = MagicMock()
+    mock_paginator = MagicMock()
+    recent_time = datetime.now(timezone.utc)
+    mock_paginator.paginate.return_value = [
+        {
+            "Contents": [
+                {
+                    "Key": "raw/crypto/2026/06/21/bitcoin/ts.json",
+                    "LastModified": recent_time,
+                }
+            ]
+        }
+    ]
+    mock_client.get_paginator.return_value = mock_paginator
+
+    with patch("storage.s3_storage.get_s3_client", return_value=mock_client):
+        result = archive_old_data("test-bucket", days_to_keep=7)
+
+    assert result == 0
+    mock_client.copy_object.assert_not_called()
+    mock_client.delete_object.assert_not_called()
