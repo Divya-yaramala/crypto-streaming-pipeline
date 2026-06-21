@@ -18,6 +18,7 @@ AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 
 
 def get_s3_client():
+    """Create and return a boto3 S3 client using env-configured credentials."""
     client = boto3.client(
         "s3",
         aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -29,6 +30,7 @@ def get_s3_client():
 
 
 def save_price_event_to_s3(event: dict, bucket: str) -> bool:
+    """Save a raw price event JSON to S3 under the raw/crypto/<YYYY/MM/DD>/<id>/ prefix."""
     if not bucket:
         return False
     try:
@@ -52,6 +54,7 @@ def save_price_event_to_s3(event: dict, bucket: str) -> bool:
 
 
 def save_aggregation_to_s3(agg: dict, bucket: str) -> bool:
+    """Save a computed aggregation result to S3 under the processed/aggregations/ prefix."""
     if not bucket:
         return False
     try:
@@ -80,6 +83,7 @@ def save_aggregation_to_s3(agg: dict, bucket: str) -> bool:
 
 
 def save_alert_to_s3(alert: dict, bucket: str) -> bool:
+    """Save an alert dict to S3 under the processed/alerts/ prefix."""
     if not bucket:
         return False
     try:
@@ -104,6 +108,7 @@ def save_alert_to_s3(alert: dict, bucket: str) -> bool:
 
 
 def archive_old_data(bucket: str, days_to_keep: int = 7) -> int:
+    """Move raw crypto files older than days_to_keep into the archive/ prefix."""
     if not bucket:
         return 0
     s3 = get_s3_client()
@@ -127,11 +132,13 @@ def archive_old_data(bucket: str, days_to_keep: int = 7) -> int:
 
 
 def get_daily_summary(bucket: str, date: str) -> dict:
+    """Return object counts for events, alerts, and aggregations stored on a given date."""
     if not bucket:
         return {"total_events": 0, "total_alerts": 0, "total_aggregations": 0}
     s3 = get_s3_client()
 
     def count_objects(prefix: str) -> int:
+        """Count S3 objects under a given prefix."""
         response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
         return response.get("KeyCount", 0)
 
@@ -145,4 +152,7 @@ def get_daily_summary(bucket: str, date: str) -> dict:
 
 
 if __name__ == "__main__":
-    print(get_daily_summary(AWS_BUCKET_NAME, datetime.now(timezone.utc).strftime("%Y/%m/%d")))
+    logger.info(
+        "%s",
+        get_daily_summary(AWS_BUCKET_NAME, datetime.now(timezone.utc).strftime("%Y/%m/%d")),
+    )

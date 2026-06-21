@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 def timer_decorator(func: Callable) -> Callable:
+    """Wrap a function to log its execution duration after each call."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         start = time.time()
@@ -22,6 +24,7 @@ def timer_decorator(func: Callable) -> Callable:
 def parallel_process_events(
     events: List[dict], process_func: Callable, max_workers: int = 5
 ) -> List[dict]:
+    """Process a list of events concurrently using a thread pool."""
     results = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(process_func, event): event for event in events}
@@ -34,6 +37,7 @@ def parallel_process_events(
 
 
 def batch_insert_postgres(rows: list, insert_sql: str, conn, batch_size: int = 100) -> int:
+    """Insert rows into PostgreSQL in batches; return the total number of rows inserted."""
     inserted = 0
     cursor = conn.cursor()
     try:
@@ -52,6 +56,7 @@ def batch_insert_postgres(rows: list, insert_sql: str, conn, batch_size: int = 1
 
 
 def run_benchmark(events: List[dict], process_func: Callable) -> dict:
+    """Benchmark sequential vs parallel event processing and return timing results."""
     start_seq = time.time()
     for event in events:
         process_func(event)

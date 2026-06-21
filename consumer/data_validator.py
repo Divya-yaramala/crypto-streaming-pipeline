@@ -1,5 +1,7 @@
 import logging
+import os
 from datetime import datetime
+from typing import List
 
 from consumer import slack_alerter
 
@@ -9,10 +11,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-VALID_CRYPTO_IDS = ["bitcoin", "ethereum", "solana", "cardano", "dogecoin"]
+_raw_ids = os.getenv("CRYPTO_IDS", "bitcoin,ethereum,solana,cardano,dogecoin")
+VALID_CRYPTO_IDS: List[str] = [c.strip() for c in _raw_ids.split(",")]
 
 
 def validate_price_event(event: dict) -> dict:
+    """Validate a price event dict and return a result with valid flag, checks, and errors."""
     checks = {}
     errors = []
 
@@ -79,6 +83,7 @@ def validate_price_event(event: dict) -> dict:
 
 
 def validate_aggregation(agg: dict) -> dict:
+    """Validate an aggregation row and return a result with valid flag, checks, and errors."""
     checks = {}
     errors = []
 
@@ -122,6 +127,7 @@ def validate_aggregation(agg: dict) -> dict:
 
 
 def calculate_stream_quality_score(events: list) -> float:
+    """Compute the percentage of valid events; send a Slack alert if below 80%."""
     if not events:
         return 0.0
     valid_count = sum(1 for e in events if e.get("valid", False))
@@ -136,6 +142,7 @@ def calculate_stream_quality_score(events: list) -> float:
 
 
 def run_stream_validation(events: list) -> dict:
+    """Validate a batch of events and return aggregate counts and quality score."""
     results = [validate_price_event(e) for e in events]
     valid_count = sum(1 for r in results if r["valid"])
     invalid_count = len(results) - valid_count

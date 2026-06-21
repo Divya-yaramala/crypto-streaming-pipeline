@@ -3,6 +3,7 @@ import logging
 import os
 import time
 from datetime import datetime, timezone
+from typing import Any
 
 import psycopg2
 from kafka import KafkaConsumer
@@ -27,9 +28,11 @@ POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "crypto_pass")
 POSTGRES_DB = os.getenv("POSTGRES_DB", "crypto_db")
 
 AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME", "")
+PRICE_ALERT_THRESHOLD_PCT = float(os.getenv("PRICE_ALERT_THRESHOLD_PCT", "10.0"))
 
 
 def create_kafka_consumer() -> KafkaConsumer:
+    """Create and return a configured KafkaConsumer subscribed to the price topic."""
     consumer = KafkaConsumer(
         KAFKA_TOPIC_CRYPTO_PRICES,
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
@@ -41,7 +44,8 @@ def create_kafka_consumer() -> KafkaConsumer:
     return consumer
 
 
-def save_to_postgres(event: dict, conn) -> bool:
+def save_to_postgres(event: dict, conn: Any) -> bool:
+    """Insert a price event into PostgreSQL, ignoring duplicates on conflict."""
     try:
         with conn.cursor() as cur:
             cur.execute(
@@ -73,7 +77,8 @@ def save_to_postgres(event: dict, conn) -> bool:
         return False
 
 
-def check_price_alert(event: dict, conn) -> bool:
+def check_price_alert(event: dict, conn: Any) -> bool:
+    """Check if a price event exceeds the alert threshold and record an alert if so."""
     change = event.get("change_24h_pct")
     if change is None:
         return False
@@ -81,12 +86,12 @@ def check_price_alert(event: dict, conn) -> bool:
     alert_type = None
     alert_message = None
 
-    if change > 10.0:
+    if change > PRICE_ALERT_THRESHOLD_PCT:
         alert_type = "PUMP"
-        alert_message = "Price up more than 10% in 24h"
-    elif change < -10.0:
+        alert_message = f"Price up more than {PRICE_ALERT_THRESHOLD_PCT}% in 24h"
+    elif change < -PRICE_ALERT_THRESHOLD_PCT:
         alert_type = "DUMP"
-        alert_message = "Price down more than 10% in 24h"
+        alert_message = f"Price down more than {PRICE_ALERT_THRESHOLD_PCT}% in 24h"
 
     if alert_type:
         crypto_id = event.get("crypto_id", "unknown")
@@ -125,6 +130,7 @@ def check_price_alert(event: dict, conn) -> bool:
 
 
 def _save_invalid_event_to_s3(event: dict, errors: list) -> None:
+    """Persist a rejected event and its validation errors to S3 for later inspection."""
     if not AWS_BUCKET_NAME:
         return
     try:
@@ -147,6 +153,7 @@ def _save_invalid_event_to_s3(event: dict, errors: list) -> None:
 
 
 def run_consumer() -> None:
+    """Run the main consumer loop, processing messages from Kafka and persisting them."""
     conn = psycopg2.connect(
         host=POSTGRES_HOST,
         port=POSTGRES_PORT,

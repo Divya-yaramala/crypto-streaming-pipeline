@@ -15,6 +15,7 @@ SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 
 
 def send_slack_message(message: str, color: str = "good") -> bool:
+    """Post a formatted message to Slack via webhook; return False if webhook is not set."""
     if not SLACK_WEBHOOK_URL:
         logger.warning("SLACK_WEBHOOK_URL not set, skipping notification")
         return False
@@ -38,11 +39,13 @@ def send_slack_message(message: str, color: str = "good") -> bool:
 
 
 def alert_price_pump(crypto_id: str, change_pct: float, price: float) -> bool:
+    """Send a PUMP alert to Slack when a crypto surges more than the alert threshold."""
     message = f"🚀 PUMP ALERT: {crypto_id} up {change_pct:.2f}% " f"— Current price: ${price:,.2f}"
     return send_slack_message(message, color="danger")
 
 
 def alert_price_dump(crypto_id: str, change_pct: float, price: float) -> bool:
+    """Send a DUMP alert to Slack when a crypto drops more than the alert threshold."""
     message = (
         f"📉 DUMP ALERT: {crypto_id} down {abs(change_pct):.2f}% " f"— Current price: ${price:,.2f}"
     )
@@ -50,6 +53,7 @@ def alert_price_dump(crypto_id: str, change_pct: float, price: float) -> bool:
 
 
 def alert_pipeline_error(step: str, error: str) -> bool:
+    """Send a pipeline error notification to Slack for the given step."""
     message = f"⚠️ Pipeline Error in {step}: {error}"
     return send_slack_message(message, color="warning")
 
@@ -60,6 +64,7 @@ def send_daily_summary(
     alerts_triggered: int,
     quality_score: float,
 ) -> bool:
+    """Send a daily pipeline summary message to Slack."""
     message = (
         f"📊 Daily Summary:\n"
         f"• Total events: {total_events}\n"

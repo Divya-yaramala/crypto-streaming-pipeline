@@ -17,6 +17,7 @@ AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 
 
 def send_to_dlq(event: dict, error: str, step: str, bucket: str) -> bool:
+    """Persist a failed event to the S3 dead-letter queue for the given pipeline step."""
     if not bucket:
         logger.warning("AWS_BUCKET_NAME not set, skipping DLQ save")
         return False
@@ -49,6 +50,7 @@ def send_to_dlq(event: dict, error: str, step: str, bucket: str) -> bool:
 
 
 def get_dlq_events(bucket: str, date: str, step: Optional[str] = None) -> list:
+    """Retrieve all DLQ events from S3 for a given date and optional step filter."""
     if not bucket:
         return []
     try:
@@ -70,6 +72,7 @@ def get_dlq_events(bucket: str, date: str, step: Optional[str] = None) -> list:
 
 
 def replay_dlq_event(event: dict, step: str) -> bool:
+    """Re-process a single DLQ event through the original pipeline step."""
     from consumer import data_validator, slack_alerter
     from consumer.crypto_consumer import save_to_postgres
     from storage import s3_storage
@@ -113,6 +116,7 @@ def replay_dlq_event(event: dict, step: str) -> bool:
 
 
 def run_dlq_replay(bucket: str, date: str) -> dict:
+    """Replay all DLQ events for a given date and return replay summary counts."""
     events = get_dlq_events(bucket, date)
     total = len(events)
     replayed = 0

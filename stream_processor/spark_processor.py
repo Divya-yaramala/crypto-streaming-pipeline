@@ -2,7 +2,7 @@ import logging
 import os
 import time
 
-from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, StringType, StructField, StructType
 
@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-WINDOW_DURATION = "1 minute"
+WINDOW_DURATION = os.getenv("SPARK_WINDOW_DURATION", "1 minute")
 
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 KAFKA_TOPIC_CRYPTO_PRICES = os.getenv("KAFKA_TOPIC_CRYPTO_PRICES", "crypto-prices")
@@ -39,6 +39,7 @@ _SCHEMA = StructType(
 
 
 def create_spark_session() -> SparkSession:
+    """Create and return a SparkSession configured for Kafka streaming."""
     spark = (
         SparkSession.builder.appName("CryptoStreamProcessor")
         .config(
@@ -51,7 +52,8 @@ def create_spark_session() -> SparkSession:
     return spark
 
 
-def read_kafka_stream(spark: SparkSession):
+def read_kafka_stream(spark: SparkSession) -> DataFrame:
+    """Subscribe to the Kafka price topic and return a parsed streaming DataFrame."""
     raw_df = (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS)
@@ -65,7 +67,8 @@ def read_kafka_stream(spark: SparkSession):
     return parsed_df
 
 
-def calculate_aggregations(df):
+def calculate_aggregations(df: DataFrame) -> DataFrame:
+    """Compute tumbling-window price aggregations grouped by crypto_id."""
     return df.groupBy(
         "crypto_id",
         F.window(F.col("timestamp"), WINDOW_DURATION),
@@ -79,7 +82,8 @@ def calculate_aggregations(df):
     )
 
 
-def write_to_postgres(df, epoch_id: int) -> None:
+def write_to_postgres(df: DataFrame, epoch_id: int) -> None:
+    """Write a micro-batch of aggregations to PostgreSQL and save each row to S3."""
     jdbc_url = f"jdbc:postgresql://{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
     properties = {
         "user": POSTGRES_USER,
@@ -128,6 +132,7 @@ def write_to_postgres(df, epoch_id: int) -> None:
 
 
 def run_stream_processor() -> None:
+    """Start the Spark structured streaming job and block until termination."""
     spark = create_spark_session()
     logger.info("Stream processor started")
     raw_stream = read_kafka_stream(spark)

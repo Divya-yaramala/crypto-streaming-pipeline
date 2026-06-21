@@ -22,6 +22,7 @@ CRYPTO_IDS = ["bitcoin", "ethereum", "solana", "cardano", "dogecoin"]
 
 
 def fetch_crypto_prices(crypto_ids: list) -> dict:
+    """Fetch current USD prices for the given crypto IDs from CoinGecko."""
     ids_param = ",".join(crypto_ids)
     url = (
         f"{COINGECKO_BASE_URL}/simple/price"
@@ -46,6 +47,7 @@ def fetch_crypto_prices(crypto_ids: list) -> dict:
 
 
 def create_kafka_producer() -> KafkaProducer:
+    """Create and return a configured KafkaProducer instance."""
     producer = KafkaProducer(
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_serializer=lambda x: json.dumps(x).encode("utf-8"),
@@ -55,6 +57,7 @@ def create_kafka_producer() -> KafkaProducer:
 
 
 def publish_price_event(producer: KafkaProducer, crypto_id: str, price_data: dict) -> bool:
+    """Build and publish a price event for one crypto to the Kafka topic."""
     try:
         event = {
             "crypto_id": crypto_id,
@@ -77,6 +80,7 @@ def publish_price_event(producer: KafkaProducer, crypto_id: str, price_data: dic
 
 
 def run_producer(interval_seconds: int = 60) -> None:
+    """Run the polling loop, fetching and publishing crypto prices at regular intervals."""
     producer = create_kafka_producer()
     logger.info("Producer started. Polling every %d seconds.", interval_seconds)
     try:

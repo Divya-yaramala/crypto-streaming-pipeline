@@ -1,12 +1,16 @@
+import logging
 import os
 import time
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 import pandas as pd
 import plotly.express as px
 import psycopg2
 import requests
 import streamlit as st
+
+logger = logging.getLogger(__name__)
 
 st.set_page_config(
     page_title="Crypto Intelligence Dashboard",
@@ -38,7 +42,8 @@ CRYPTO_COLORS = {
 }
 
 
-def get_db_connection():
+def get_db_connection() -> Optional[psycopg2.extensions.connection]:
+    """Open a psycopg2 connection; return None if the database is unreachable."""
     try:
         conn = psycopg2.connect(
             host=POSTGRES_HOST,
@@ -48,11 +53,15 @@ def get_db_connection():
             dbname=POSTGRES_DB,
         )
         return conn
-    except Exception:
+    except Exception as e:
+        logger.error("Failed to connect to PostgreSQL: %s", e)
         return None
 
 
-def load_crypto_prices(conn, hours: int = 24) -> pd.DataFrame:
+def load_crypto_prices(
+    conn: Optional[psycopg2.extensions.connection], hours: int = 24
+) -> pd.DataFrame:
+    """Query crypto_prices for recent rows and return a DataFrame; empty on error."""
     if conn is None:
         return pd.DataFrame()
     try:
@@ -64,11 +73,15 @@ def load_crypto_prices(conn, hours: int = 24) -> pd.DataFrame:
             ORDER BY event_timestamp DESC
         """
         return pd.read_sql_query(query, conn, params=(cutoff,))
-    except Exception:
+    except Exception as e:
+        logger.error("Failed to load crypto prices: %s", e)
         return pd.DataFrame()
 
 
-def load_crypto_alerts(conn, hours: int = 24) -> pd.DataFrame:
+def load_crypto_alerts(
+    conn: Optional[psycopg2.extensions.connection], hours: int = 24
+) -> pd.DataFrame:
+    """Query crypto_alerts for recent rows and return a DataFrame; empty on error."""
     if conn is None:
         return pd.DataFrame()
     try:
@@ -81,11 +94,15 @@ def load_crypto_alerts(conn, hours: int = 24) -> pd.DataFrame:
             LIMIT 50
         """
         return pd.read_sql_query(query, conn, params=(cutoff,))
-    except Exception:
+    except Exception as e:
+        logger.error("Failed to load crypto alerts: %s", e)
         return pd.DataFrame()
 
 
-def load_aggregations(conn, hours: int = 1) -> pd.DataFrame:
+def load_aggregations(
+    conn: Optional[psycopg2.extensions.connection], hours: int = 1
+) -> pd.DataFrame:
+    """Query crypto_price_aggregates for recent windows; return empty DataFrame on error."""
     if conn is None:
         return pd.DataFrame()
     try:
@@ -99,11 +116,13 @@ def load_aggregations(conn, hours: int = 1) -> pd.DataFrame:
             LIMIT 50
         """
         return pd.read_sql_query(query, conn, params=(cutoff,))
-    except Exception:
+    except Exception as e:
+        logger.error("Failed to load aggregations: %s", e)
         return pd.DataFrame()
 
 
 def fetch_live_prices() -> dict:
+    """Fetch live USD prices for all tracked cryptos from CoinGecko; return {} on error."""
     try:
         ids_param = ",".join(CRYPTO_IDS)
         url = (
@@ -114,7 +133,8 @@ def fetch_live_prices() -> dict:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         return response.json()
-    except Exception:
+    except Exception as e:
+        logger.error("Failed to fetch live prices: %s", e)
         return {}
 
 
@@ -126,9 +146,10 @@ with st.sidebar:
 
     st.subheader("Date Range")
     hours = st.slider("Hours of history", min_value=1, max_value=168, value=24, step=1)
-    st.caption(
-        f"Showing data from {(datetime.now(timezone.utc) - timedelta(hours=hours)).strftime('%Y-%m-%d %H:%M')} UTC"
+    cutoff_str = (datetime.now(timezone.utc) - timedelta(hours=hours)).strftime(
+        "%Y-%m-%d %H:%M"
     )
+    st.caption(f"Showing data from {cutoff_str} UTC")
     st.divider()
 
     st.subheader("Cryptos")
@@ -228,7 +249,14 @@ with col_alerts:
 with col_agg:
     st.subheader("📈 1-Minute Aggregations")
     if not agg_df.empty:
-        display_cols = ["crypto_id", "window_start", "avg_price", "min_price", "max_price", "record_count"]
+        display_cols = [
+            "crypto_id",
+            "window_start",
+            "avg_price",
+            "min_price",
+            "max_price",
+            "record_count",
+        ]
         available = [c for c in display_cols if c in agg_df.columns]
         st.dataframe(agg_df[available], use_container_width=True, hide_index=True)
     else:

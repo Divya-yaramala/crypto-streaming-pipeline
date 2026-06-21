@@ -1,7 +1,7 @@
 import logging
 import os
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from typing import Any, Dict, Generator, List, Optional
 
 import psycopg2
 import uvicorn
@@ -19,6 +19,8 @@ POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "crypto_user")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "crypto_pass")
 POSTGRES_DB = os.getenv("POSTGRES_DB", "crypto_db")
+API_HOST = os.getenv("API_HOST", "0.0.0.0")
+API_PORT = int(os.getenv("API_PORT", "8000"))
 
 CRYPTO_IDS = ["bitcoin", "ethereum", "solana", "cardano", "dogecoin"]
 
@@ -52,7 +54,8 @@ class CryptoAggregation(BaseModel):
     record_count: int
 
 
-def get_db_connection():
+def get_db_connection() -> Generator[Any, None, None]:
+    """Yield a psycopg2 connection and ensure it is closed after the request."""
     conn = psycopg2.connect(
         host=POSTGRES_HOST,
         port=POSTGRES_PORT,
@@ -67,17 +70,22 @@ def get_db_connection():
 
 
 @app.get("/health")
-def health():
+def health() -> Dict[str, str]:
+    """Return a simple health-check response with the current UTC timestamp."""
     return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
 @app.get("/cryptos")
 def get_cryptos() -> List[str]:
+    """Return the list of tracked crypto IDs."""
     return CRYPTO_IDS
 
 
 @app.get("/prices/{crypto_id}", response_model=List[CryptoPrice])
-def get_prices(crypto_id: str, hours: int = 24, conn=Depends(get_db_connection)):
+def get_prices(
+    crypto_id: str, hours: int = 24, conn: Any = Depends(get_db_connection)
+) -> List[CryptoPrice]:
+    """Retrieve recent price records for a given crypto within the specified hour window."""
     since = datetime.now(timezone.utc) - timedelta(hours=hours)
     with conn.cursor() as cur:
         cur.execute(
@@ -106,7 +114,10 @@ def get_prices(crypto_id: str, hours: int = 24, conn=Depends(get_db_connection))
 
 
 @app.get("/alerts/{crypto_id}", response_model=List[CryptoAlert])
-def get_alerts(crypto_id: str, hours: int = 24, conn=Depends(get_db_connection)):
+def get_alerts(
+    crypto_id: str, hours: int = 24, conn: Any = Depends(get_db_connection)
+) -> List[CryptoAlert]:
+    """Retrieve recent alerts for a given crypto within the specified hour window."""
     since = datetime.now(timezone.utc) - timedelta(hours=hours)
     with conn.cursor() as cur:
         cur.execute(
@@ -133,7 +144,10 @@ def get_alerts(crypto_id: str, hours: int = 24, conn=Depends(get_db_connection))
 
 
 @app.get("/aggregations/{crypto_id}", response_model=List[CryptoAggregation])
-def get_aggregations(crypto_id: str, hours: int = 1, conn=Depends(get_db_connection)):
+def get_aggregations(
+    crypto_id: str, hours: int = 1, conn: Any = Depends(get_db_connection)
+) -> List[CryptoAggregation]:
+    """Retrieve recent aggregation windows for a given crypto."""
     since = datetime.now(timezone.utc) - timedelta(hours=hours)
     with conn.cursor() as cur:
         cur.execute(
@@ -163,7 +177,8 @@ def get_aggregations(crypto_id: str, hours: int = 1, conn=Depends(get_db_connect
 
 
 @app.get("/summary/{crypto_id}")
-def get_summary(crypto_id: str, conn=Depends(get_db_connection)):
+def get_summary(crypto_id: str, conn: Any = Depends(get_db_connection)) -> Dict[str, Any]:
+    """Return the latest price, most recent alert, and latest aggregation for a crypto."""
     since_24h = datetime.now(timezone.utc) - timedelta(hours=24)
     since_1h = datetime.now(timezone.utc) - timedelta(hours=1)
 
@@ -197,7 +212,8 @@ def get_summary(crypto_id: str, conn=Depends(get_db_connection)):
         )
         agg_row = cur.fetchone()
 
-    def _iso(val):
+    def _iso(val: Any) -> Optional[str]:
+        """Convert a value to ISO string if it supports isoformat, else return None."""
         return val.isoformat() if val and hasattr(val, "isoformat") else None
 
     return {
@@ -219,8 +235,9 @@ def get_summary(crypto_id: str, conn=Depends(get_db_connection)):
 
 
 @app.get("/dashboard")
-def get_dashboard(conn=Depends(get_db_connection)):
-    result = {}
+def get_dashboard(conn: Any = Depends(get_db_connection)) -> Dict[str, Any]:
+    """Return the latest price and 24h change for every tracked crypto."""
+    result: Dict[str, Any] = {}
     for crypto_id in CRYPTO_IDS:
         with conn.cursor() as cur:
             cur.execute(
@@ -242,4 +259,4 @@ def get_dashboard(conn=Depends(get_db_connection)):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=API_HOST, port=API_PORT)

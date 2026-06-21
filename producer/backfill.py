@@ -26,6 +26,7 @@ POSTGRES_DB = os.getenv("POSTGRES_DB", "crypto_db")
 
 
 def fetch_historical_prices(crypto_id: str, days: int = 30) -> list:
+    """Fetch daily historical prices for a crypto from CoinGecko; return empty list on error."""
     try:
         url = f"{COINGECKO_BASE_URL}/coins/{crypto_id}/market_chart"
         params: dict[str, Any] = {"vs_currency": "usd", "days": days, "interval": "daily"}
@@ -41,6 +42,7 @@ def fetch_historical_prices(crypto_id: str, days: int = 30) -> list:
 
 
 def format_historical_event(crypto_id: str, timestamp_ms: int, price: float) -> dict:
+    """Convert a CoinGecko [timestamp_ms, price] pair into a pipeline event dict."""
     ts = datetime.fromtimestamp(timestamp_ms / 1000, tz=timezone.utc)
     return {
         "crypto_id": crypto_id,
@@ -53,6 +55,7 @@ def format_historical_event(crypto_id: str, timestamp_ms: int, price: float) -> 
 
 
 def save_historical_to_s3(events: list, crypto_id: str, bucket: str) -> int:
+    """Upload historical price events to S3 under the raw/crypto prefix; return saved count."""
     if not bucket or not events:
         return 0
     s3 = boto3.client("s3", region_name=AWS_REGION)
@@ -82,7 +85,8 @@ def save_historical_to_s3(events: list, crypto_id: str, bucket: str) -> int:
     return saved
 
 
-def save_historical_to_postgres(events: list, conn) -> int:
+def save_historical_to_postgres(events: list, conn: Any) -> int:
+    """Bulk-insert historical price events into PostgreSQL; return count of rows inserted."""
     if not events:
         return 0
     inserted = 0
@@ -116,22 +120,22 @@ def save_historical_to_postgres(events: list, conn) -> int:
 
 
 def run_backfill(crypto_ids: list, days: int = 30, bucket: Optional[str] = None) -> dict:
+    """Run a full backfill for the given cryptos, writing data to S3 and PostgreSQL."""
     total_events = 0
     saved_s3 = 0
     saved_postgres = 0
 
     pg_conn = None
-    if True:
-        try:
-            pg_conn = psycopg2.connect(
-                host=POSTGRES_HOST,
-                port=POSTGRES_PORT,
-                user=POSTGRES_USER,
-                password=POSTGRES_PASSWORD,
-                dbname=POSTGRES_DB,
-            )
-        except Exception as e:
-            logger.error("PostgreSQL connection failed, skipping DB backfill: %s", e)
+    try:
+        pg_conn = psycopg2.connect(
+            host=POSTGRES_HOST,
+            port=POSTGRES_PORT,
+            user=POSTGRES_USER,
+            password=POSTGRES_PASSWORD,
+            dbname=POSTGRES_DB,
+        )
+    except Exception as e:
+        logger.error("PostgreSQL connection failed, skipping DB backfill: %s", e)
 
     for crypto_id in crypto_ids:
         price_pairs = fetch_historical_prices(crypto_id, days)
@@ -162,4 +166,4 @@ if __name__ == "__main__":
     from producer.config import CRYPTO_IDS
 
     result = run_backfill(CRYPTO_IDS, days=30, bucket=os.getenv("AWS_BUCKET_NAME") or "")
-    print(result)
+    logger.info("Backfill result: %s", result)

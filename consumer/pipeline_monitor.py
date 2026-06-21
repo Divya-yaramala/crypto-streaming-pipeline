@@ -23,6 +23,7 @@ def record_event_metric(
     duration_seconds: float,
     bucket: str,
 ) -> bool:
+    """Write a single pipeline metric record to S3; return False if bucket is not set."""
     if not bucket:
         return False
     try:
@@ -59,6 +60,7 @@ def record_event_metric(
 
 
 def get_step_metrics(step: str, bucket: str, date: str) -> list:
+    """Fetch all metric records for a given pipeline step and date from S3."""
     if not bucket:
         return []
     try:
@@ -78,6 +80,7 @@ def get_step_metrics(step: str, bucket: str, date: str) -> list:
 
 
 def calculate_step_stats(metrics: list) -> dict:
+    """Compute success rate and duration stats from a list of metric records."""
     if not metrics:
         return {
             "total_events": 0,
@@ -104,6 +107,7 @@ def calculate_step_stats(metrics: list) -> dict:
 
 
 def generate_hourly_report(bucket: str, date: str, hour: int) -> dict:
+    """Generate per-step stats for a specific hour and return the report dict."""
     report: dict = {"date": date, "hour": hour, "steps": {}}
     for step in PIPELINE_STEPS:
         metrics = get_step_metrics(step, bucket, date)
@@ -115,6 +119,7 @@ def generate_hourly_report(bucket: str, date: str, hour: int) -> dict:
 
 
 def generate_daily_report(bucket: str, date: str) -> dict:
+    """Generate and save a full-day pipeline report to S3; return the report dict."""
     all_metrics: list = []
     step_stats: dict = {}
     for step in PIPELINE_STEPS:
