@@ -5,7 +5,7 @@
 |---|---|
 | Python files | 15+ modules |
 | Test files | 10 test files |
-| Total tests | 83 passing |
+| Total tests | 89 passing |
 | dbt models | 5 models |
 | Kafka topics | 2 topics |
 | ADRs | 9 architecture decisions |
@@ -37,3 +37,5 @@
 13. Batch PostgreSQL inserts
 14. Retry Logic with Tenacity (3 attempts, exponential backoff)
 15. Edge Case Test Coverage (boundary conditions)
+16. Full Type Hints across all modules
+17. Docstrings on every function
