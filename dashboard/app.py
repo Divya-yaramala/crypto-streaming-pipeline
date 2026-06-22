@@ -146,9 +146,7 @@ with st.sidebar:
 
     st.subheader("Date Range")
     hours = st.slider("Hours of history", min_value=1, max_value=168, value=24, step=1)
-    cutoff_str = (datetime.now(timezone.utc) - timedelta(hours=hours)).strftime(
-        "%Y-%m-%d %H:%M"
-    )
+    cutoff_str = (datetime.now(timezone.utc) - timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M")
     st.caption(f"Showing data from {cutoff_str} UTC")
     st.divider()
 

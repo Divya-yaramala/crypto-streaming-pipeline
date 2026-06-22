@@ -6,6 +6,10 @@
 ![Tests](https://img.shields.io/badge/tests-80%2B%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+---
+> 🎉 **Project 2 Complete!** 80+ tests · Kafka · PySpark · Snowflake · dbt · Streamlit · REST API · 9 ADRs · 20 days of building
+---
+
 > A production-grade real-time crypto price streaming pipeline that ingests live prices every 60 seconds, processes with PySpark, stores in PostgreSQL and AWS S3, transforms with dbt, warehouses in Snowflake, and displays on a live Streamlit dashboard.
 
 ## 📐 Architecture
