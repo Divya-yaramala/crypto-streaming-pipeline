@@ -1,111 +1,133 @@
-# Real-Time Crypto Price Streaming Pipeline
+# 🚀 Real-Time Crypto Price Streaming Pipeline
 
 [![CI Pipeline](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Tests](https://img.shields.io/badge/tests-89%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-80%2B%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> 🚀 **Live Dashboard:** Run `streamlit run dashboard/app.py` and open http://localhost:8501
+> A production-grade real-time crypto price streaming pipeline that ingests live prices every 60 seconds, processes with PySpark, stores in PostgreSQL and AWS S3, transforms with dbt, warehouses in Snowflake, and displays on a live Streamlit dashboard.
 
-A production-grade real-time cryptocurrency price streaming pipeline built with Apache Kafka, PySpark Structured Streaming, PostgreSQL, AWS S3, and Snowflake.
-
-## Key Features
-
-- Real-time Kafka streaming at 60-second intervals
-- PySpark micro-batch aggregations (1-minute windows)
-- Dual storage: PostgreSQL (hot) + AWS S3 (cold)
-- Snowflake data warehouse with dbt transformations
-- Live Streamlit dashboard with auto-refresh
-- Slack alerts for PUMP/DUMP price movements
-- Dead letter queue for zero data loss
-- 6-point data validation per event
-- Historical backfill up to 365 days
-- REST API with Swagger UI
-
-## Architecture
+## 📐 Architecture
 
 ```
-CoinGecko API --> Kafka Producer --> Kafka Topic
-                                          |
-                                   Kafka Consumer --> PostgreSQL + AWS S3
-                                          |
-                                    PySpark Processor --> PostgreSQL (aggregates)
-                                          |
-                                    Snowflake Sync --> Snowflake RAW
-                                                             |
-                                                    dbt --> Snowflake MARTS
-                                                            staging views +
-                                                            mart tables
-                                                             |
-                                                    Streamlit Dashboard
+CoinGecko API ──► Kafka Producer ──► Kafka Topic
+                                          │
+                                          ▼
+                                   Kafka Consumer ──► PostgreSQL + AWS S3
+                                          │
+                                          ▼
+                                  PySpark Processor ──► PostgreSQL (aggregates)
+                                          │
+                                          ▼
+                                  Snowflake Sync ──► Snowflake RAW + MARTS
+                                          │
+                                          ▼
+                                  dbt ──► Snowflake MARTS
+                                          │
+                              ┌───────────┴───────────┐
+                              ▼                       ▼
+                     Streamlit Dashboard          REST API
 ```
 
-## Tech Stack
+## ✨ Key Features
 
-| Layer          | Technology                  |
-|----------------|-----------------------------|
-| Streaming      | Apache Kafka                |
-| Processing     | PySpark Structured Streaming|
-| Source API     | CoinGecko (free, no API key)|
-| Storage        | PostgreSQL + AWS S3         |
-| Data Warehouse | Snowflake                   |
-| Transformation | dbt Core                    |
-| Orchestration  | Docker Compose              |
-| Testing        | pytest                      |
-| CI/CD          | GitHub Actions              |
+- 🔄 Real-time Kafka streaming at 60-second intervals
+- ⚡ PySpark micro-batch aggregations (1-minute windows)
+- 🗄️ Dual storage: PostgreSQL (hot) + AWS S3 (cold)
+- ❄️ Snowflake data warehouse with dbt transformations
+- 📊 Live Streamlit dashboard with auto-refresh
+- 🔔 Slack PUMP/DUMP alerts (>10% price change)
+- 🛡️ Dead letter queue for zero data loss
+- ✅ 6-point stream data validation per event
+- 📈 Historical backfill up to 365 days
+- 🌐 REST API with 7 endpoints + Swagger UI
+- 🔁 Retry logic with tenacity for resilience
+- 📋 9 Architecture Decision Records
 
-## 📊 Live Dashboard
+## 🛠️ Tech Stack
 
-Real-time crypto price dashboard built with Streamlit:
-
-| Feature | Details |
+| Layer | Technology |
 |---|---|
-| Live prices | CoinGecko API (updates every 60s) |
-| Price charts | 24-hour Plotly line charts |
-| Alerts | PUMP/DUMP detection display |
-| Aggregations | 1-minute OHLC windows |
+| Streaming | Apache Kafka |
+| Processing | PySpark Structured Streaming |
+| Source API | CoinGecko (free, no key needed) |
+| Hot Storage | PostgreSQL |
+| Cold Storage | AWS S3 |
+| Transformation | dbt Core |
+| Data Warehouse | Snowflake |
+| Dashboard | Streamlit + Plotly |
+| REST API | FastAPI |
+| Alerting | Slack Webhooks |
+| CI/CD | GitHub Actions |
+| Testing | pytest (80+ tests) |
+| Code Quality | black, isort, flake8, mypy |
 
-Start the dashboard:
+## 🏗️ Pipeline Components
+
+| Component | File | Responsibility |
+|---|---|---|
+| Producer | producer/crypto_producer.py | Fetch + publish prices |
+| Consumer | consumer/crypto_consumer.py | Process + store events |
+| Validator | consumer/data_validator.py | 6-point validation |
+| DLQ | consumer/dead_letter_queue.py | Capture failed events |
+| Monitor | consumer/pipeline_monitor.py | Track metrics |
+| Spark | stream_processor/spark_processor.py | Aggregations |
+| S3 Storage | storage/s3_storage.py | Cold storage |
+| Snowflake | storage/snowflake_connector.py | Warehouse sync |
+| API | api/main.py | REST endpoints |
+| Dashboard | dashboard/app.py | Live visualization |
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.11+
+- Docker Desktop
+- AWS Account with S3 bucket
+- Snowflake Account (free trial)
+- Slack Webhook URL (optional)
+
+### Quick Start
 
 ```bash
-# With Docker
-docker-compose up -d streamlit-dashboard
-# Open http://localhost:8501
-
-# Without Docker
-streamlit run dashboard/app.py
-```
-
-## Documentation
-
-- [Pipeline Overview](docs/pipeline-overview.md)
-- [Architecture Decision Records](docs/adr/README.md)
-- [Backfill Guide](docs/backfill-guide.md)
-- [Data Flow](docs/data-flow.md)
-- [Setup Guide](docs/setup-guide.md)
-- [Operations Runbook](docs/runbook.md)
-- [Project Statistics](docs/project-stats.md)
-
-## Getting Started
-
-```bash
-# 1. Copy environment variables
+# 1. Clone and setup
+git clone https://github.com/Divya-yaramala/crypto-streaming-pipeline.git
+cd crypto-streaming-pipeline
 cp .env.example .env
+# Fill in credentials
 
-# 2. Validate all environment variables
+# 2. Validate environment
 python scripts/validate_secrets.py
 
-# 3. Start all services
+# 3. Start Kafka and PostgreSQL
 make up
 
-# 4. Run tests
-make test
+# 4. Backfill historical data (optional)
+python scripts/run_backfill.py --days 30
+
+# 5. Start producer (terminal 1)
+python producer/crypto_producer.py
+
+# 6. Start consumer (terminal 2)
+python consumer/crypto_consumer.py
+
+# 7. Start dashboard
+make dashboard
+# Open http://localhost:8501
+
+# 8. Start REST API
+make api
+# Open http://localhost:8000/docs
 ```
 
-## REST API
+### Running Tests
 
-The pipeline exposes a REST API:
+```bash
+pytest tests/ -v
+```
+
+## 🌐 REST API
 
 | Endpoint | Description |
 |---|---|
@@ -117,54 +139,37 @@ The pipeline exposes a REST API:
 | GET /summary/{crypto_id} | Combined summary |
 | GET /dashboard | All cryptos summary |
 
-Start the API:
 ```bash
 uvicorn api.main:app --reload --port 8000
 # Swagger UI: http://localhost:8000/docs
 ```
 
-## Backfilling Historical Data
+## 📚 Documentation
 
-```bash
-# Backfill last 30 days for all cryptos
-python scripts/run_backfill.py --days 30
+- [Pipeline Overview](docs/pipeline-overview.md)
+- [Architecture Decision Records](docs/adr/README.md)
+- [Backfill Guide](docs/backfill-guide.md)
+- [Data Flow](docs/data-flow.md)
+- [Setup Guide](docs/setup-guide.md)
+- [Operations Runbook](docs/runbook.md)
+- [Project Statistics](docs/project-stats.md)
+- [Project Completion](docs/project-completion.md)
 
-# Backfill specific crypto
-python scripts/run_backfill.py --crypto bitcoin --days 90
+## 🏛️ Architecture Decisions
 
-# Preview without loading
-python scripts/run_backfill.py --days 30 --dry-run
+| ADR | Decision | Status |
+|---|---|---|
+| 001 | Apache Kafka over RabbitMQ | ✅ Accepted |
+| 002 | PySpark over Apache Flink | ✅ Accepted |
+| 003 | CoinGecko over Binance API | ✅ Accepted |
+| 004 | PostgreSQL over MongoDB | ✅ Accepted |
+| 005 | Snowflake over Redshift | ✅ Accepted |
+| 006 | Streamlit over Plotly Dash | ✅ Accepted |
+| 007 | S3 Cold Storage Strategy | ✅ Accepted |
+| 008 | S3 Caching Strategy | ✅ Accepted |
+| 009 | Retry Logic with Tenacity | ✅ Accepted |
 
-# S3 only
-python scripts/run_backfill.py --days 30 --s3-only
-```
-
-## Services
-
-| Service    | Port | Description              |
-|------------|------|--------------------------|
-| Kafka      | 9092 | Message broker           |
-| Zookeeper  | 2181 | Kafka coordination       |
-| Kafka UI   | 8080 | Web UI for Kafka topics  |
-| PostgreSQL | 5432 | Relational storage       |
-
-## Project Structure
-
-```
-crypto-streaming-pipeline/
-├── producer/          # Kafka producer — fetches from CoinGecko
-├── consumer/          # Kafka consumer — writes to PostgreSQL/S3
-├── stream_processor/  # PySpark streaming jobs
-├── storage/           # DB schema and S3 utilities
-├── tests/             # pytest test suite
-├── docs/              # Architecture and API docs
-├── docker-compose.yml # Local dev environment
-├── .env.example       # Environment variable template
-├── requirements.txt   # Python dependencies
-└── Makefile           # Common dev commands
-```
-
-## Progress Log
+## 📈 Progress Log
 
 ### Day 1 — Project Scaffold
 - Docker Compose with Kafka, Zookeeper, Kafka UI, PostgreSQL
@@ -298,3 +303,9 @@ crypto-streaming-pipeline/
 - Retry logic with tenacity for API and database calls
 - All linters passing: black, isort, flake8, mypy
 - Production-ready codebase — Project 2 complete!
+
+### ✅ Day 20 — World-Class README + Portfolio Polish
+- Rewrote README with badges, architecture, features, tech stack
+- Complete component table with file references
+- All 9 ADRs documented in summary table
+- Portfolio-ready presentation
