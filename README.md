@@ -3,7 +3,7 @@
 [![CI Pipeline](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Tests](https://img.shields.io/badge/tests-80%2B%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-100%2B%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -313,3 +313,9 @@ uvicorn api.main:app --reload --port 8000
 - Complete component table with file references
 - All 9 ADRs documented in summary table
 - Portfolio-ready presentation
+
+### ✅ Day 21 — Advanced Analytics + Portfolio Tracking
+- Built portfolio tracker: load allocations from S3, compute $10k portfolio value and daily returns
+- Built technical indicators: SMA, RSI, Bollinger Bands, MACD using numpy
+- Results saved to S3 under analytics/crypto/ and portfolio/crypto/snapshots/
+- 11 new unit tests passing green — 100/100 total
