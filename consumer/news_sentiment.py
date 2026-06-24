@@ -37,9 +37,7 @@ def fetch_crypto_news(crypto_id: str) -> list:
             response.raise_for_status()
             data = response.json()
             headlines = [
-                article["title"]
-                for article in data.get("articles", [])
-                if article.get("title")
+                article["title"] for article in data.get("articles", []) if article.get("title")
             ]
         else:
             url = "https://api.coingecko.com/api/v3/news"

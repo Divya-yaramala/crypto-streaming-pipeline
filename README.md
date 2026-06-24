@@ -319,3 +319,10 @@ uvicorn api.main:app --reload --port 8000
 - Built technical indicators: SMA, RSI, Bollinger Bands, MACD using numpy
 - Results saved to S3 under analytics/crypto/ and portfolio/crypto/snapshots/
 - 11 new unit tests passing green — 100/100 total
+
+### ✅ Day 22 — News Sentiment + Market Correlation
+- Built crypto news sentiment analyzer (BULLISH/BEARISH/NEUTRAL)
+- Market correlation matrix for all 5 cryptos
+- Beta calculation vs Bitcoin as market proxy
+- Sentiment and correlation results saved to S3
+- 10 unit tests passing green — 110/110 total
