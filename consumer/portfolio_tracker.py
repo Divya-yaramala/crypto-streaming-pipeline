@@ -50,7 +50,9 @@ def calculate_portfolio_value(portfolio: dict, current_prices: dict) -> dict:
         k: round(v / total_value * 100, 4) if total_value > 0 else 0.0
         for k, v in individual_values.items()
     }
-    top_holding = max(individual_values, key=lambda k: individual_values[k]) if individual_values else None
+    top_holding = (
+        max(individual_values, key=lambda k: individual_values[k]) if individual_values else None
+    )
     metrics = {
         "total_value": round(total_value, 2),
         "individual_values": {k: round(v, 2) for k, v in individual_values.items()},
@@ -83,9 +85,7 @@ def calculate_portfolio_returns(
             daily_return_pct = 0.0
         individual_returns[crypto_id] = round(daily_return_pct, 4)
 
-    weighted_return = sum(
-        portfolio.get(cid, 0.0) * ret for cid, ret in individual_returns.items()
-    )
+    weighted_return = sum(portfolio.get(cid, 0.0) * ret for cid, ret in individual_returns.items())
     result = {
         "individual_returns": individual_returns,
         "weighted_portfolio_return_pct": round(weighted_return, 4),
@@ -132,13 +132,11 @@ def run_portfolio_tracking() -> None:
             dbname=os.getenv("POSTGRES_DB", "crypto_db"),
         )
         with conn.cursor() as cur:
-            cur.execute(
-                """
+            cur.execute("""
                 SELECT DISTINCT ON (crypto_id) crypto_id, price_usd
                 FROM crypto_prices
                 ORDER BY crypto_id, event_timestamp DESC
-                """
-            )
+                """)
             current_prices = {row[0]: float(row[1]) for row in cur.fetchall()}
 
             since_25h = datetime.now(timezone.utc) - timedelta(hours=25)
