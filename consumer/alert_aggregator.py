@@ -71,7 +71,9 @@ def find_alert_patterns(bucket: str, days: int = 7) -> dict:
         crypto_counts[crypto_id] = crypto_counts.get(crypto_id, 0) + 1
         rule_counts[rule_id] = rule_counts.get(rule_id, 0) + 1
 
-    most_alerted_crypto = max(crypto_counts, key=lambda k: crypto_counts[k]) if crypto_counts else None
+    most_alerted_crypto = (
+        max(crypto_counts, key=lambda k: crypto_counts[k]) if crypto_counts else None
+    )
     most_common_rule = max(rule_counts, key=lambda k: rule_counts[k]) if rule_counts else None
     peak_alert_day = max(daily_counts, key=lambda k: daily_counts[k]) if daily_counts else None
 
@@ -149,9 +151,8 @@ def suppress_duplicate_alerts(
 
         cutoff = datetime.now(timezone.utc).timestamp() - suppress_minutes * 60
         for past in history:
-            if (
-                past.get("rule_id") == alert.get("rule_id")
-                and past.get("crypto_id") == alert.get("crypto_id")
+            if past.get("rule_id") == alert.get("rule_id") and past.get("crypto_id") == alert.get(
+                "crypto_id"
             ):
                 try:
                     past_ts = datetime.fromisoformat(past["triggered_at"]).timestamp()

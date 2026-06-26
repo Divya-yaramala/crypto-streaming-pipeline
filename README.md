@@ -326,3 +326,10 @@ uvicorn api.main:app --reload --port 8000
 - Beta calculation vs Bitcoin as market proxy
 - Sentiment and correlation results saved to S3
 - 10 unit tests passing green — 110/110 total
+
+### ✅ Day 23 — Advanced Alerting + Alert Aggregation
+- Built tiered alerting with 6 rules and 4 severity levels
+- Alert aggregation with hourly bucketing and pattern detection
+- Duplicate alert suppression (30-minute window)
+- Daily alert digest sent to Slack
+- 10 unit tests passing green — 120/120 total
