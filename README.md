@@ -131,6 +131,16 @@ make api
 pytest tests/ -v
 ```
 
+### Rollback a Pipeline Step
+
+```bash
+# Preview rollback without executing
+python scripts/rollback_pipeline.py --crypto bitcoin --step consume --version-id abc12345 --dry-run
+
+# Execute rollback
+python scripts/rollback_pipeline.py --crypto bitcoin --step consume --version-id abc12345
+```
+
 ## 🌐 REST API
 
 | Endpoint | Description |
@@ -333,3 +343,10 @@ uvicorn api.main:app --reload --port 8000
 - Duplicate alert suppression (30-minute window)
 - Daily alert digest sent to Slack
 - 10 unit tests passing green — 120/120 total
+
+### ✅ Day 24 — Data Versioning + Pipeline Rollback
+- Built data versioner with MD5-based version IDs
+- Snapshots saved to S3 under versions/crypto/YYYY/MM/DD/
+- CLI rollback script with --dry-run preview mode
+- Can rollback any pipeline step to any previous version
+- 6 unit tests passing green — 126/126 total

@@ -26,9 +26,7 @@ def validate_rollback_args(args) -> bool:
         logger.error("Invalid step '%s'. Choose from: %s", args.step, VALID_STEPS)
         return False
     if len(args.version_id) != 8:
-        logger.error(
-            "--version-id must be exactly 8 characters (got %d)", len(args.version_id)
-        )
+        logger.error("--version-id must be exactly 8 characters (got %d)", len(args.version_id))
         return False
     return True
 
@@ -65,9 +63,7 @@ def execute_rollback(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Rollback a pipeline step to a previous version"
-    )
+    parser = argparse.ArgumentParser(description="Rollback a pipeline step to a previous version")
     parser.add_argument(
         "--crypto",
         required=True,

@@ -70,12 +70,8 @@ def list_versions(
         for obj in response.get("Contents", []):
             key = obj["Key"]
             version_id = key.rsplit("_", 1)[-1].replace(".json", "")
-            versions.append(
-                {"version_id": version_id, "created_at": obj.get("LastModified", "")}
-            )
-        logger.info(
-            "Found %d version(s) for %s/%s on %s", len(versions), crypto_id, step, date
-        )
+            versions.append({"version_id": version_id, "created_at": obj.get("LastModified", "")})
+        logger.info("Found %d version(s) for %s/%s on %s", len(versions), crypto_id, step, date)
         return versions
     except Exception as e:
         logger.error("Failed to list versions: %s", e)
