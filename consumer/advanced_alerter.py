@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
+from typing import Any
 
 import boto3
 import requests
@@ -83,11 +84,12 @@ _SEVERITY_COLORS = {
 def evaluate_alert_rules(event: dict) -> list:
     triggered = []
     for rule in ALERT_RULES:
-        metric = rule["metric"]
+        metric: str = str(rule["metric"])
         value = event.get(metric)
         if value is None:
             continue
-        op_fn = _OPERATORS.get(rule["operator"])
+        operator_key: str = str(rule["operator"])
+        op_fn = _OPERATORS.get(operator_key)
         if op_fn and op_fn(float(value), rule["threshold"]):
             alert = {
                 **rule,
@@ -121,7 +123,7 @@ def send_tiered_alert(rule: dict, event: dict, webhook_url: str) -> bool:
         f"{crypto_id} | price=${price:,.2f} | change={change:+.2f}%"
     )
     try:
-        payload = {
+        payload: dict[str, Any] = {
             "attachments": [
                 {
                     "color": color,
