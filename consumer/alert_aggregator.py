@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 import boto3
 import requests
@@ -121,7 +122,7 @@ def send_daily_alert_digest(bucket: str, date: str, webhook_url: str) -> bool:
         logger.warning("No webhook URL set, skipping digest send")
         return False
     try:
-        payload = {
+        payload: dict[str, Any] = {
             "attachments": [
                 {
                     "color": "good",

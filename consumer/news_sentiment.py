@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
+from typing import Any
 
 import boto3
 import requests
@@ -32,7 +33,12 @@ def fetch_crypto_news(crypto_id: str) -> list:
         if NEWS_API_KEY:
             query = CRYPTO_COMPANIES.get(crypto_id, crypto_id)
             url = "https://newsapi.org/v2/everything"
-            params = {"q": query, "apiKey": NEWS_API_KEY, "language": "en", "pageSize": 20}
+            params: dict[str, Any] = {
+                "q": query,
+                "apiKey": NEWS_API_KEY,
+                "language": "en",
+                "pageSize": 20,
+            }
             response = requests.get(url, params=params, timeout=10)
             response.raise_for_status()
             data = response.json()
