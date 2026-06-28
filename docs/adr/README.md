@@ -15,3 +15,4 @@ Architecture Decision Records (ADRs) document the significant technical decision
 | [007](007-s3-cold-storage.md) | S3 cold storage strategy | Accepted |
 | [008](008-caching-strategy.md) | S3 Caching Strategy | Accepted |
 | [009](009-retry-with-tenacity.md) | Retry Logic with Tenacity | Accepted |
+| [010](010-data-observatory-health-scoring.md) | Data Observatory and Health Scoring | Accepted |
