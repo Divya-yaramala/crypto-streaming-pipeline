@@ -3,11 +3,11 @@
 [![CI Pipeline](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Tests](https://img.shields.io/badge/tests-100%2B%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-119%2B%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
-> 🎉 **Project 2 Complete!** 80+ tests · Kafka · PySpark · Snowflake · dbt · Streamlit · REST API · 9 ADRs · 20 days of building
+> 🎉 **Project 2 Complete!** 119+ tests · Kafka · PySpark · Snowflake · dbt · Streamlit · REST API · 9 ADRs · 20 production patterns · 25 days
 ---
 
 > A production-grade real-time crypto price streaming pipeline that ingests live prices every 60 seconds, processes with PySpark, stores in PostgreSQL and AWS S3, transforms with dbt, warehouses in Snowflake, and displays on a live Streamlit dashboard.
@@ -48,6 +48,16 @@ CoinGecko API ──► Kafka Producer ──► Kafka Topic
 - 🌐 REST API with 7 endpoints + Swagger UI
 - 🔁 Retry logic with tenacity for resilience
 - 📋 9 Architecture Decision Records
+
+## 📊 Project Stats
+| Metric | Value |
+|---|---|
+| Total tests | 119+ passing |
+| Production patterns | 20 |
+| ADRs | 9 |
+| Docker services | 6 |
+| Days to build | 25 |
+| CI/CD workflows | 2 |
 
 ## 🛠️ Tech Stack
 
@@ -350,3 +360,9 @@ uvicorn api.main:app --reload --port 8000
 - CLI rollback script with --dry-run preview mode
 - Can rollback any pipeline step to any previous version
 - 6 unit tests passing green — 126/126 total
+
+### ✅ Day 25 — Final Portfolio Polish
+- Created final project statistics document
+- Updated README with project stats table
+- Portfolio-ready with 119+ tests and 20 production patterns
+- Project 2 complete after 25 days of building!
