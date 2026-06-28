@@ -3,11 +3,11 @@
 [![CI Pipeline](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Divya-yaramala/crypto-streaming-pipeline/actions/workflows/code-quality.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Tests](https://img.shields.io/badge/tests-119%2B%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-153%2B%20passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
-> 🎉 **Project 2 Complete!** 119+ tests · Kafka · PySpark · Snowflake · dbt · Streamlit · REST API · 9 ADRs · 20 production patterns · 25 days
+> 🎉 **Project 2 — Day 26!** 153+ tests · Kafka · PySpark · Snowflake · dbt · Streamlit · REST API · 10 ADRs · 22 production patterns · 26 days
 ---
 
 > A production-grade real-time crypto price streaming pipeline that ingests live prices every 60 seconds, processes with PySpark, stores in PostgreSQL and AWS S3, transforms with dbt, warehouses in Snowflake, and displays on a live Streamlit dashboard.
@@ -47,16 +47,16 @@ CoinGecko API ──► Kafka Producer ──► Kafka Topic
 - 📈 Historical backfill up to 365 days
 - 🌐 REST API with 7 endpoints + Swagger UI
 - 🔁 Retry logic with tenacity for resilience
-- 📋 9 Architecture Decision Records
+- 📋 10 Architecture Decision Records
 
 ## 📊 Project Stats
 | Metric | Value |
 |---|---|
-| Total tests | 119+ passing |
-| Production patterns | 20 |
-| ADRs | 9 |
+| Total tests | 153+ passing |
+| Production patterns | 22 |
+| ADRs | 10 |
 | Docker services | 6 |
-| Days to build | 25 |
+| Days to build | 26 |
 | CI/CD workflows | 2 |
 
 ## 🛠️ Tech Stack
@@ -86,6 +86,8 @@ CoinGecko API ──► Kafka Producer ──► Kafka Topic
 | Validator | consumer/data_validator.py | 6-point validation |
 | DLQ | consumer/dead_letter_queue.py | Capture failed events |
 | Monitor | consumer/pipeline_monitor.py | Track metrics |
+| Observatory | consumer/data_observatory.py | Data freshness, completeness, anomaly checks |
+| Health Scorer | consumer/health_scorer.py | Score, grade, and recommend pipeline health |
 | Spark | stream_processor/spark_processor.py | Aggregations |
 | S3 Storage | storage/s3_storage.py | Cold storage |
 | Snowflake | storage/snowflake_connector.py | Warehouse sync |
@@ -192,6 +194,7 @@ uvicorn api.main:app --reload --port 8000
 | 007 | S3 Cold Storage Strategy | ✅ Accepted |
 | 008 | S3 Caching Strategy | ✅ Accepted |
 | 009 | Retry Logic with Tenacity | ✅ Accepted |
+| 010 | Data Observatory and Health Scoring | ✅ Accepted |
 
 ## 📈 Progress Log
 
@@ -366,3 +369,10 @@ uvicorn api.main:app --reload --port 8000
 - Updated README with project stats table
 - Portfolio-ready with 119+ tests and 20 production patterns
 - Project 2 complete after 25 days of building!
+
+### ✅ Day 26 — Data Observatory + Pipeline Health Scoring
+- Built data observatory: freshness check (hours since last S3 update), completeness check (% of expected S3 paths present), price anomaly detection (3-sigma rule)
+- Built health scorer: converts observatory metrics into a 0–100 score, A–F letter grade, HEALTHY/DEGRADED/CRITICAL status, actionable recommendations, and improving/stable/degrading trend
+- Health reports saved to S3 under monitoring/health/YYYY/MM/DD/report.json
+- 27 new unit tests passing green — 153/153 total
+- ADR 010: data observatory and health scoring strategy

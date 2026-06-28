@@ -56,6 +56,8 @@ consumer/crypto_consumer.py   stream_processor/           producer/backfill.py
 | dbt Models | `dbt_project/models/` | Staging views and mart tables in Snowflake |
 | Backfill CLI | `scripts/run_backfill.py` | CLI wrapper for historical backfill |
 | Secrets Validator | `scripts/validate_secrets.py` | Check all required env vars at startup |
+| Data Observatory | `consumer/data_observatory.py` | Check data freshness, completeness, and price anomalies |
+| Health Scorer | `consumer/health_scorer.py` | Translate observatory metrics into score, grade, and recommendations |
 
 ## Data Models
 
