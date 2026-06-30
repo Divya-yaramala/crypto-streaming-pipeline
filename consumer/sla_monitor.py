@@ -60,7 +60,9 @@ def record_sla_metric(
     bucket: str,
     date: str,
 ) -> bool:
-    threshold = next((t for t in SLA_THRESHOLDS if str(t["sla_id"]) == sla_id), None)
+    threshold: Optional[Dict[str, Any]] = next(
+        (t for t in SLA_THRESHOLDS if str(t["sla_id"]) == sla_id), None
+    )
     max_seconds = int(str(threshold["max_seconds"])) if threshold else 0
     met = actual_seconds <= max_seconds
     ts = datetime.now(timezone.utc).isoformat()
@@ -82,9 +84,7 @@ def record_sla_metric(
             ContentType="application/json",
         )
         status = "met" if met else "breached"
-        logger.info(
-            "SLA %s %s: %.2fs (max=%ds)", sla_id, status, actual_seconds, max_seconds
-        )
+        logger.info("SLA %s %s: %.2fs (max=%ds)", sla_id, status, actual_seconds, max_seconds)
         return True
     except Exception as e:
         logger.error("Failed to record SLA metric %s: %s", sla_id, e)
@@ -104,9 +104,7 @@ def get_sla_metrics(
         for obj in response.get("Contents", []):
             try:
                 body = s3.get_object(Bucket=bucket, Key=str(obj["Key"]))
-                metric: Dict[str, Any] = json.loads(
-                    body["Body"].read().decode("utf-8")
-                )
+                metric: Dict[str, Any] = json.loads(body["Body"].read().decode("utf-8"))
                 metrics.append(metric)
             except Exception:
                 pass
@@ -149,9 +147,7 @@ def generate_sla_report(
             "compliance": compliance,
         }
         all_compliance.append(float(str(compliance["compliance_pct"])))
-    overall = (
-        round(sum(all_compliance) / len(all_compliance), 1) if all_compliance else 0.0
-    )
+    overall = round(sum(all_compliance) / len(all_compliance), 1) if all_compliance else 0.0
     report: Dict[str, Any] = {
         "date": date,
         "overall_compliance_pct": overall,

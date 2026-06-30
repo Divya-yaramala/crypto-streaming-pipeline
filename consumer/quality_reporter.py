@@ -32,9 +32,7 @@ def generate_hourly_quality_report(
     except Exception:
         pass
     invalid_events = total_events - valid_events
-    quality_score_pct = (
-        round(valid_events / total_events * 100, 1) if total_events > 0 else 100.0
-    )
+    quality_score_pct = round(valid_events / total_events * 100, 1) if total_events > 0 else 100.0
     report: Dict[str, Any] = {
         "date": date,
         "hour": hour,
@@ -43,9 +41,7 @@ def generate_hourly_quality_report(
         "invalid_events": invalid_events,
         "quality_score_pct": quality_score_pct,
     }
-    logger.info(
-        "Hourly quality score for %s hour %02d: %.1f%%", date, hour, quality_score_pct
-    )
+    logger.info("Hourly quality score for %s hour %02d: %.1f%%", date, hour, quality_score_pct)
     return report
 
 
@@ -62,9 +58,7 @@ def generate_daily_quality_report(
         total_events += int(str(hourly.get("total_events", 0)))
         valid_events += int(str(hourly.get("valid_events", 0)))
     invalid_events = total_events - valid_events
-    quality_score_pct = (
-        round(valid_events / total_events * 100, 1) if total_events > 0 else 100.0
-    )
+    quality_score_pct = round(valid_events / total_events * 100, 1) if total_events > 0 else 100.0
     report: Dict[str, Any] = {
         "date": date,
         "total_events": total_events,
@@ -108,9 +102,7 @@ def compare_quality_trends(
             daily_scores.append(score)
         except Exception:
             pass
-    avg_quality = (
-        round(sum(daily_scores) / len(daily_scores), 1) if daily_scores else 0.0
-    )
+    avg_quality = round(sum(daily_scores) / len(daily_scores), 1) if daily_scores else 0.0
     trend = "stable"
     if len(daily_scores) >= 2:
         recent_n = min(3, len(daily_scores))
@@ -135,13 +127,8 @@ def generate_quality_alert(
     threshold: float = 80.0,
 ) -> Optional[str]:
     if quality_score < threshold:
-        msg = (
-            f"Quality alert: score {quality_score:.1f}% is below "
-            f"threshold {threshold:.1f}%"
-        )
-        logger.warning(
-            "Quality alert generated: %.1f%% < %.1f%%", quality_score, threshold
-        )
+        msg = f"Quality alert: score {quality_score:.1f}% is below " f"threshold {threshold:.1f}%"
+        logger.warning("Quality alert generated: %.1f%% < %.1f%%", quality_score, threshold)
         return msg
     return None
 
