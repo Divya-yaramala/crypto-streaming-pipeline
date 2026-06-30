@@ -25,9 +25,7 @@ def get_system_resources() -> Dict[str, float]:
         "memory_percent": mem_pct,
         "disk_percent": disk_pct,
     }
-    logger.info(
-        "Resources: CPU=%.1f%% MEM=%.1f%% DISK=%.1f%%", cpu_pct, mem_pct, disk_pct
-    )
+    logger.info("Resources: CPU=%.1f%% MEM=%.1f%% DISK=%.1f%%", cpu_pct, mem_pct, disk_pct)
     return resources
 
 

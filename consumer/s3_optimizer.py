@@ -35,9 +35,7 @@ def calculate_storage_size(bucket: str, prefix: str) -> Dict[str, Any]:
         "total_size_mb": total_size_mb,
         "object_count": object_count,
     }
-    logger.info(
-        "Storage size for %s: %.4f MB (%d objects)", prefix, total_size_mb, object_count
-    )
+    logger.info("Storage size for %s: %.4f MB (%d objects)", prefix, total_size_mb, object_count)
     return result
 
 
@@ -140,6 +138,19 @@ def run_cost_optimization(bucket: str) -> Dict[str, Any]:
         "by_prefix": by_prefix,
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
+    try:
+        s3 = boto3.client("s3", region_name=AWS_REGION)
+        date = datetime.now(timezone.utc).strftime("%Y/%m/%d")
+        key = f"monitoring/cost-optimization/{date}/report.json"
+        s3.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=json.dumps(report, default=str),
+            ContentType="application/json",
+        )
+        logger.info("Cost optimization report saved to S3: %s", key)
+    except Exception as e:
+        logger.error("Failed to save cost optimization report: %s", e)
     potential_savings = float(str(savings.get("savings", 0.0)))
     logger.info("Cost Optimization Complete: $%.4f potential savings", potential_savings)
     return report
