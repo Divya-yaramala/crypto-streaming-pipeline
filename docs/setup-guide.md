@@ -39,6 +39,18 @@ python stream_processor/spark_processor.py
 - Clear expired cache weekly: `python -c "from consumer.cache_manager import clear_expired_cache; import os; clear_expired_cache(os.getenv('AWS_BUCKET_NAME'))"`
 - Run benchmark to measure speedup: `python -c "from consumer.performance_optimizer import run_benchmark; print(run_benchmark([], lambda x: x))"`
 
+## Cost Optimization Commands
+```bash
+# Run full cost optimization check
+python -c "from consumer.s3_optimizer import run_cost_optimization; import os; print(run_cost_optimization(os.getenv('AWS_BUCKET_NAME')))"
+
+# Check system resources
+python -c "from consumer.resource_manager import run_resource_check; import os; print(run_resource_check(os.getenv('AWS_BUCKET_NAME')))"
+
+# Estimate Kafka throughput
+python -c "from consumer.resource_manager import estimate_kafka_throughput; print(estimate_kafka_throughput(10.0, 2.5))"
+```
+
 ## SLA Monitoring Commands
 ```bash
 # Run SLA check for today
