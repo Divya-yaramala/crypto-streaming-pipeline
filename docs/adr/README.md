@@ -17,3 +17,4 @@ Architecture Decision Records (ADRs) document the significant technical decision
 | [009](009-retry-with-tenacity.md) | Retry Logic with Tenacity | Accepted |
 | [010](010-data-observatory-health-scoring.md) | Data Observatory and Health Scoring | Accepted |
 | [011](011-sla-monitoring-pattern.md) | SLA Monitoring Pattern | Accepted |
+| [012](012-s3-cost-optimization.md) | S3 Cost Optimization Strategy | Accepted |

@@ -5,10 +5,10 @@
 |---|---|
 | Python files | 15+ modules |
 | Test files | 10 test files |
-| Total tests | 163 passing |
+| Total tests | 173 passing |
 | dbt models | 5 models |
 | Kafka topics | 2 topics |
-| ADRs | 11 architecture decisions |
+| ADRs | 12 architecture decisions |
 | API endpoints | 7 REST endpoints |
 
 ## Pipeline Statistics
@@ -44,3 +44,6 @@
 20. SLA Monitoring (6 thresholds, compliance tracking)
 21. Quality Reporting (hourly + daily + trend analysis)
 22. Quality Alerts (threshold-based alerting)
+23. S3 Cost Optimization (Glacier archival)
+24. Resource Monitoring (CPU, memory, disk)
+25. Consumer Lag Estimation
