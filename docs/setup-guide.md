@@ -39,6 +39,18 @@ python stream_processor/spark_processor.py
 - Clear expired cache weekly: `python -c "from consumer.cache_manager import clear_expired_cache; import os; clear_expired_cache(os.getenv('AWS_BUCKET_NAME'))"`
 - Run benchmark to measure speedup: `python -c "from consumer.performance_optimizer import run_benchmark; print(run_benchmark([], lambda x: x))"`
 
+## SLA Monitoring Commands
+```bash
+# Run SLA check for today
+python -c "from consumer.sla_monitor import run_sla_check; import os; print(run_sla_check(os.getenv('AWS_BUCKET_NAME')))"
+
+# Generate quality report
+python -c "from consumer.quality_reporter import run_quality_reporting; import os; print(run_quality_reporting(os.getenv('AWS_BUCKET_NAME')))"
+
+# Check quality trend (last 7 days)
+python -c "from consumer.quality_reporter import compare_quality_trends; import os; print(compare_quality_trends(os.getenv('AWS_BUCKET_NAME')))"
+```
+
 ## Pro Tips
 - Run `python scripts/validate_secrets.py` before starting pipeline
 - Use `--dry-run` flag on backfill to preview data volume
