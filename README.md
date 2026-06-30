@@ -383,3 +383,10 @@ uvicorn api.main:app --reload --port 8000
 - SLA compliance percentage tracking per pipeline step
 - Quality alerts triggered when score drops below 80%
 - 10 unit tests passing green
+
+### ✅ Day 28 — Cost Optimization + Resource Management
+- Built S3 cost optimizer with Glacier archival for data 30+ days old
+- Estimated savings calculator (Standard vs Glacier pricing)
+- Resource manager tracking CPU, memory, disk usage
+- Consumer lag estimation with healthy/warning/critical status
+- 10 unit tests passing green
