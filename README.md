@@ -390,3 +390,10 @@ uvicorn api.main:app --reload --port 8000
 - Resource manager tracking CPU, memory, disk usage
 - Consumer lag estimation with healthy/warning/critical status
 - 10 unit tests passing green
+
+### ✅ Day 29 — Audit Logging + Structured Logging
+- Built audit logger with S3-based audit trail
+- Structured JSON logging ready for CloudWatch/Datadog
+- Pipeline event logging (start/end/metrics/errors)
+- Audit report grouping events by action and resource
+- 10 unit tests passing green
