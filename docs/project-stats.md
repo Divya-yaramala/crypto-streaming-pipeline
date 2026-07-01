@@ -5,10 +5,10 @@
 |---|---|
 | Python files | 15+ modules |
 | Test files | 10 test files |
-| Total tests | 173 passing |
+| Total tests | 183 passing |
 | dbt models | 5 models |
 | Kafka topics | 2 topics |
-| ADRs | 12 architecture decisions |
+| ADRs | 13 architecture decisions |
 | API endpoints | 7 REST endpoints |
 
 ## Pipeline Statistics
@@ -47,3 +47,6 @@
 23. S3 Cost Optimization (Glacier archival)
 24. Resource Monitoring (CPU, memory, disk)
 25. Consumer Lag Estimation
+26. Audit Logging (S3-based audit trail)
+27. Structured JSON Logging (CloudWatch-ready)
+28. Pipeline Event Logging (start/end/metrics)

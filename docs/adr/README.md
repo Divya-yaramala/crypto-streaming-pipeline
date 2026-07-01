@@ -18,3 +18,4 @@ Architecture Decision Records (ADRs) document the significant technical decision
 | [010](010-data-observatory-health-scoring.md) | Data Observatory and Health Scoring | Accepted |
 | [011](011-sla-monitoring-pattern.md) | SLA Monitoring Pattern | Accepted |
 | [012](012-s3-cost-optimization.md) | S3 Cost Optimization Strategy | Accepted |
+| [013](013-structured-logging-pattern.md) | Structured Logging Pattern | Accepted |
