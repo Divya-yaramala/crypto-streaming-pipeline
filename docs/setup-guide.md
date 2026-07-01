@@ -39,6 +39,22 @@ python stream_processor/spark_processor.py
 - Clear expired cache weekly: `python -c "from consumer.cache_manager import clear_expired_cache; import os; clear_expired_cache(os.getenv('AWS_BUCKET_NAME'))"`
 - Run benchmark to measure speedup: `python -c "from consumer.performance_optimizer import run_benchmark; print(run_benchmark([], lambda x: x))"`
 
+## Audit Logging Commands
+```bash
+# Generate audit report for today
+python -c "from consumer.audit_logger import generate_audit_report; import os, datetime; print(generate_audit_report(os.getenv('AWS_BUCKET_NAME'), datetime.datetime.now().strftime('%Y/%m/%d')))"
+
+# Get audit logs for specific action
+python -c "from consumer.audit_logger import get_audit_logs; import os, datetime; print(get_audit_logs(os.getenv('AWS_BUCKET_NAME'), datetime.datetime.now().strftime('%Y/%m/%d'), action='price_ingested'))"
+```
+
+## Structured Logging
+```bash
+# The structured logger outputs JSON to stdout
+# To ship to CloudWatch add AWS CloudWatch handler
+# To ship to Datadog add Datadog handler
+```
+
 ## Cost Optimization Commands
 ```bash
 # Run full cost optimization check
