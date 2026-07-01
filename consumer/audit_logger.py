@@ -35,9 +35,7 @@ def create_audit_entry(
         "status": status,
         "timestamp": ts,
     }
-    logger.info(
-        "Audit entry created: %s action=%s resource=%s", audit_id, action, resource
-    )
+    logger.info("Audit entry created: %s action=%s resource=%s", audit_id, action, resource)
     return entry
 
 
